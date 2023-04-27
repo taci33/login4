@@ -1,0 +1,56 @@
+﻿@page
+@model login4.Pages.DataGrids.clientesCModel
+@{
+}@(Html.DevExtreme().DataGrid<login4.Models.EF.ClientesContacto>()
+    .DataSource(ds => ds.Mvc()
+        .Controller("ClientesContactos")
+        .LoadAction("Get")
+        .InsertAction("Post")
+        .UpdateAction("Put")
+        .DeleteAction("Delete")
+        .Key("Id")
+    )
+    .Paging(paging => paging.PageSize(10))
+    .Pager(pager =>
+    {
+        pager.ShowPageSizeSelector(true);
+        pager.AllowedPageSizes(new[] { 5, 10, 20 });
+        pager.ShowInfo(true);
+    })
+
+    .RemoteOperations(true)
+    .Sorting(sorting => sorting.Mode(GridSortingMode.Multiple))
+    .Grouping(g => g.AutoExpandAll(false))
+    .GroupPanel(gp => gp.Visible(true))
+    .Columns(columns => {
+
+        columns.AddFor(m => m.Id);
+
+        columns.AddFor(m => m.PersonaId);
+
+        columns.AddFor(m => m.Nombre);
+
+        columns.AddFor(m => m.Apellidos);
+
+        columns.AddFor(m => m.Telefono1);
+
+        columns.AddFor(m => m.Telefono2);
+
+        columns.AddFor(m => m.Email);
+
+        columns.AddFor(m => m.Cargo);
+
+        columns.AddFor(m => m.Departamento);
+
+        columns.AddFor(m => m.Notas);
+
+        columns.AddFor(m => m.PersonaDireccionId);
+
+        columns.AddFor(m => m.ContactoTipoId);
+    })
+    .Editing(e => e
+        .AllowAdding(true)
+        .AllowUpdating(true)
+        .AllowDeleting(true)
+    )
+)
