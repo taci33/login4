@@ -1,5 +1,6 @@
 using login4.Models.EF;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,8 +9,11 @@ var connectionString = builder.Configuration.GetConnectionString("Intranet_Senas
 builder.Services.AddDbContext<IntranetSenasaData230209Context>(options =>
     options.UseSqlServer(connectionString));
 
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddEntityFrameworkStores<IntranetSenasaData230209Context>();
+
 builder.Services
-    .AddRazorPages()
+    .AddRazorPages(/*options => options.Conventions.AuthorizePage("/Pages/About")*/)
     .AddJsonOptions(options => options.JsonSerializerOptions.PropertyNamingPolicy = null);
 
 var app = builder.Build();
@@ -22,6 +26,7 @@ if (!app.Environment.IsDevelopment())
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseAuthentication();;
 
 app.UseAuthorization();
 

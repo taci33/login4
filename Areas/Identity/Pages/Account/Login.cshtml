@@ -1,7 +1,14 @@
-@page
-@model Areas.Identity.Pages.Account.LoginModel
-<h2 class="content-block"><a href="https://www.soltic.es">Soltic </a></h2>
-@*
+﻿@page
+@model login4.Areas.Identity.Pages.Account.LoginModel
+@{
+    ViewData["Title"] = "Log in";
+  
+}
+
+
+<h1>@ViewData["Title"]</h1>
+<h2 class="content-block">About</h2>
+
 <div class="row">
     <div class="col-md-4">
         <section>
@@ -53,10 +60,8 @@
                 {
                     <div>
                         <p>
-                            There are no external authentication services configured. See this <a href="https://go.microsoft.com/fwlink/?LinkID=532715">
-                                article
-                                about setting up this ASP.NET application to support logging in via external services
-                            </a>.
+                            There are no external authentication services configured. See this <a href="https://go.microsoft.com/fwlink/?LinkID=532715">article
+                            about setting up this ASP.NET application to support logging in via external services</a>.
                         </p>
                     </div>
                 }
@@ -76,4 +81,8 @@
             }
         </section>
     </div>
-</div>*@
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

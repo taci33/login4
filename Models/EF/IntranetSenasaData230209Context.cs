@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 namespace login4.Models.EF;
 
-public partial class IntranetSenasaData230209Context : DbContext
+public partial class IntranetSenasaData230209Context : IdentityDbContext
 {
     public IntranetSenasaData230209Context()
     {
@@ -213,23 +214,11 @@ public partial class IntranetSenasaData230209Context : DbContext
 
     public virtual DbSet<ClientesPeriodosExentosPago> ClientesPeriodosExentosPagos { get; set; }
 
-    public virtual DbSet<ClientesRole> ClientesRoles { get; set; }
-
     public virtual DbSet<ClientesTelefono> ClientesTelefonos { get; set; }
 
     public virtual DbSet<ClientesTipo> ClientesTipos { get; set; }
 
     public virtual DbSet<ClientesTipoIdentificacion> ClientesTipoIdentificacions { get; set; }
-
-    public virtual DbSet<ClientesUser> ClientesUsers { get; set; }
-
-    public virtual DbSet<ClientesUserClaim> ClientesUserClaims { get; set; }
-
-    public virtual DbSet<ClientesUserLogin> ClientesUserLogins { get; set; }
-
-    public virtual DbSet<ClientesUsertoken> ClientesUsertokens { get; set; }
-
-    public virtual DbSet<Clientesroleclaim> Clientesroleclaims { get; set; }
 
     public virtual DbSet<Comarca> Comarcas { get; set; }
 
@@ -1270,6 +1259,16 @@ public partial class IntranetSenasaData230209Context : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<IdentityUser>().ToTable("ClientesUsers")/*.Property(b => b.Id).HasColumnName("PersonaID")*/;
+        modelBuilder.Entity<IdentityRole>().ToTable("clientesRole");
+        modelBuilder.Entity<IdentityUserRole<string>>().ToTable("clientesUserRole");
+        modelBuilder.Entity<IdentityUserClaim<string>>().ToTable("clientesUserClaim");
+        modelBuilder.Entity<IdentityUserLogin<string>>().ToTable("clientesUserLogin");
+        modelBuilder.Entity<IdentityUserToken<string>>().ToTable("clientesUsertoken");
+        modelBuilder.Entity<IdentityRoleClaim<string>>().ToTable("clientesroleclaim");
+
         modelBuilder.Entity<AeEntidade>(entity =>
         {
             entity.HasKey(e => e.EntidadId);
@@ -5883,17 +5882,17 @@ public partial class IntranetSenasaData230209Context : DbContext
                 .HasConstraintName("FK_ClientesPeriodosExentosPago_Clientes");
         });
 
-        modelBuilder.Entity<ClientesRole>(entity =>
-        {
-            entity.ToTable("clientesRole");
+        //modelBuilder.Entity<ClientesRole>(entity =>
+        //{
+        //    entity.ToTable("clientesRole");
 
-            entity.HasIndex(e => e.NormalizedName, "RoleNameIndex")
-                .IsUnique()
-                .HasFilter("([NormalizedName] IS NOT NULL)");
+        //    entity.HasIndex(e => e.NormalizedName, "RoleNameIndex")
+        //        .IsUnique()
+        //        .HasFilter("([NormalizedName] IS NOT NULL)");
 
-            entity.Property(e => e.Name).HasMaxLength(256);
-            entity.Property(e => e.NormalizedName).HasMaxLength(256);
-        });
+        //    entity.Property(e => e.Name).HasMaxLength(256);
+        //    entity.Property(e => e.NormalizedName).HasMaxLength(256);
+        //});
 
         modelBuilder.Entity<ClientesTelefono>(entity =>
         {
@@ -5945,80 +5944,80 @@ public partial class IntranetSenasaData230209Context : DbContext
                 .IsUnicode(false);
         });
 
-        modelBuilder.Entity<ClientesUser>(entity =>
-        {
-            entity.HasIndex(e => e.NormalizedEmail, "EmailIndex");
+        //modelBuilder.Entity<ClientesUser>(entity =>
+        //{
+        //    entity.HasIndex(e => e.NormalizedEmail, "EmailIndex");
 
-            entity.HasIndex(e => e.NormalizedUserName, "UserNameIndex")
-                .IsUnique()
-                .HasFilter("([NormalizedUserName] IS NOT NULL)");
+        //    entity.HasIndex(e => e.NormalizedUserName, "UserNameIndex")
+        //        .IsUnique()
+        //        .HasFilter("([NormalizedUserName] IS NOT NULL)");
 
-            entity.Property(e => e.Email).HasMaxLength(256);
-            entity.Property(e => e.NormalizedEmail).HasMaxLength(256);
-            entity.Property(e => e.NormalizedUserName).HasMaxLength(256);
-            entity.Property(e => e.UserName).HasMaxLength(256);
+        //    entity.Property(e => e.Email).HasMaxLength(256);
+        //    entity.Property(e => e.NormalizedEmail).HasMaxLength(256);
+        //    entity.Property(e => e.NormalizedUserName).HasMaxLength(256);
+        //    entity.Property(e => e.UserName).HasMaxLength(256);
 
-            entity.HasMany(d => d.Roles).WithMany(p => p.Users)
-                .UsingEntity<Dictionary<string, object>>(
-                    "ClientesUserRole",
-                    r => r.HasOne<ClientesRole>().WithMany().HasForeignKey("RoleId"),
-                    l => l.HasOne<ClientesUser>().WithMany().HasForeignKey("UserId"),
-                    j =>
-                    {
-                        j.HasKey("UserId", "RoleId");
-                        j.ToTable("clientesUserRole");
-                        j.HasIndex(new[] { "RoleId" }, "IX_clientesUserRole_RoleId");
-                    });
-        });
+        //    entity.HasMany(d => d.Roles).WithMany(p => p.Users)
+        //        .UsingEntity<Dictionary<string, object>>(
+        //            "ClientesUserRole",
+        //            r => r.HasOne<ClientesRole>().WithMany().HasForeignKey("RoleId"),
+        //            l => l.HasOne<ClientesUser>().WithMany().HasForeignKey("UserId"),
+        //            j =>
+        //            {
+        //                j.HasKey("UserId", "RoleId");
+        //                j.ToTable("clientesUserRole");
+        //                j.HasIndex(new[] { "RoleId" }, "IX_clientesUserRole_RoleId");
+        //            });
+        //});
 
-        modelBuilder.Entity<ClientesUserClaim>(entity =>
-        {
-            entity.ToTable("clientesUserClaim");
+        //modelBuilder.Entity<ClientesUserClaim>(entity =>
+        //{
+        //    entity.ToTable("clientesUserClaim");
 
-            entity.HasIndex(e => e.UserId, "IX_clientesUserClaim_UserId");
+        //    entity.HasIndex(e => e.UserId, "IX_clientesUserClaim_UserId");
 
-            entity.Property(e => e.UserId).IsRequired();
+        //    entity.Property(e => e.UserId).IsRequired();
 
-            entity.HasOne(d => d.User).WithMany(p => p.ClientesUserClaims).HasForeignKey(d => d.UserId);
-        });
+        //    entity.HasOne(d => d.User).WithMany(p => p.ClientesUserClaims).HasForeignKey(d => d.UserId);
+        //});
 
-        modelBuilder.Entity<ClientesUserLogin>(entity =>
-        {
-            entity.HasKey(e => new { e.LoginProvider, e.ProviderKey });
+        //modelBuilder.Entity<ClientesUserLogin>(entity =>
+        //{
+        //    entity.HasKey(e => new { e.LoginProvider, e.ProviderKey });
 
-            entity.ToTable("clientesUserLogin");
+        //    entity.ToTable("clientesUserLogin");
 
-            entity.HasIndex(e => e.UserId, "IX_clientesUserLogin_UserId");
+        //    entity.HasIndex(e => e.UserId, "IX_clientesUserLogin_UserId");
 
-            entity.Property(e => e.LoginProvider).HasMaxLength(128);
-            entity.Property(e => e.ProviderKey).HasMaxLength(128);
-            entity.Property(e => e.UserId).IsRequired();
+        //    entity.Property(e => e.LoginProvider).HasMaxLength(128);
+        //    entity.Property(e => e.ProviderKey).HasMaxLength(128);
+        //    entity.Property(e => e.UserId).IsRequired();
 
-            entity.HasOne(d => d.User).WithMany(p => p.ClientesUserLogins).HasForeignKey(d => d.UserId);
-        });
+        //    entity.HasOne(d => d.User).WithMany(p => p.ClientesUserLogins).HasForeignKey(d => d.UserId);
+        //});
 
-        modelBuilder.Entity<ClientesUsertoken>(entity =>
-        {
-            entity.HasKey(e => new { e.UserId, e.LoginProvider, e.Name });
+        //modelBuilder.Entity<ClientesUsertoken>(entity =>
+        //{
+        //    entity.HasKey(e => new { e.UserId, e.LoginProvider, e.Name });
 
-            entity.ToTable("clientesUsertoken");
+        //    entity.ToTable("clientesUsertoken");
 
-            entity.Property(e => e.LoginProvider).HasMaxLength(128);
-            entity.Property(e => e.Name).HasMaxLength(128);
+        //    entity.Property(e => e.LoginProvider).HasMaxLength(128);
+        //    entity.Property(e => e.Name).HasMaxLength(128);
 
-            entity.HasOne(d => d.User).WithMany(p => p.ClientesUsertokens).HasForeignKey(d => d.UserId);
-        });
+        //    entity.HasOne(d => d.User).WithMany(p => p.ClientesUsertokens).HasForeignKey(d => d.UserId);
+        //});
 
-        modelBuilder.Entity<Clientesroleclaim>(entity =>
-        {
-            entity.ToTable("clientesroleclaim");
+        //modelBuilder.Entity<Clientesroleclaim>(entity =>
+        //{
+        //    entity.ToTable("clientesroleclaim");
 
-            entity.HasIndex(e => e.RoleId, "IX_clientesroleclaim_RoleId");
+        //    entity.HasIndex(e => e.RoleId, "IX_clientesroleclaim_RoleId");
 
-            entity.Property(e => e.RoleId).IsRequired();
+        //    entity.Property(e => e.RoleId).IsRequired();
 
-            entity.HasOne(d => d.Role).WithMany(p => p.Clientesroleclaims).HasForeignKey(d => d.RoleId);
-        });
+        //    entity.HasOne(d => d.Role).WithMany(p => p.Clientesroleclaims).HasForeignKey(d => d.RoleId);
+        //});
 
         modelBuilder.Entity<Comarca>(entity =>
         {

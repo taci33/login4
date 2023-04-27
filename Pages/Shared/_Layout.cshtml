@@ -8,7 +8,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>login4</title>
+    <title>Soltic</title>
     <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
 
     @* Uncomment to use the HtmlEditor control *@
@@ -74,7 +74,7 @@
                         .Location(ToolbarItemLocation.Before)
                         .CssClass("menu-button");
                     items.Add()
-                        .Html("<div>login4</div>")
+                        .Html("<div>Soltic</div>")
                         .Location(ToolbarItemLocation.Before)
                         .CssClass("header-title");
                 })
@@ -95,7 +95,14 @@
                                 <div id="footer">
                                     Copyright (c) 2000-2023 Developer Express Inc.
                                     <br />
-                                    All trademarks or registered trademarks are property of their respective owners.
+                                    <ul class="navbar-nav">
+                                    <li class="nav-item">
+                                        <a class="nav-link text-dark" id="register" asp-area="Identity" asp-page="/Account/Register">Register</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link text-dark" id="login" asp-area="Identity" asp-page="/Account/Login">Login</a>
+                                    </li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
@@ -105,15 +112,20 @@
             )
         </div>
     </div>
+    
 
     @using(Html.DevExtreme().NamedTemplate("navigation-menu")) {
         <div class="menu-container dx-swatch-additional">
 
             @functions{
-                string GetUrl(string pageName) => Url.Page(pageName);
-                string GetCurrentUrl() => Url.Page(ViewContext.RouteData.Values["page"].ToString());
-                bool IsCurrentUrl(string pageName) => GetUrl(pageName) == GetCurrentUrl();
+            string GetUrl(string pageName) => Url.Page(pageName);
+            string GetCurrentUrl() => Url.Page(ViewContext.RouteData.Values["page"].ToString());
+            bool IsCurrentUrl(string pageName) => GetUrl(pageName) == GetCurrentUrl();
+            string GetAspUrl(string pagename) => Url.Content( pagename);
+          
             }
+          
+            
 
             @(Html.DevExtreme().TreeView()
                 .Items(items =>
@@ -129,6 +141,19 @@
                         .Icon("info")
                         .Option("path", GetUrl("/About"))
                         .Selected(IsCurrentUrl("/About"));
+
+                    items.Add()
+                        .Text("Login")
+                        .Icon("card")
+                        .Option("path", GetAspUrl("/LoginEx"))
+                        .Selected(IsCurrentUrl("/LoginEx"));
+
+                items.Add()
+                    .Text("Clientes")
+                    .Icon("folder")
+                    .Option("path", GetAspUrl("/DataGrids/clientesC"))
+                    .Selected(IsCurrentUrl("/DataGrids/clientesC"))
+;
                 })
                 .ExpandEvent(TreeViewExpandEvent.Click)
                 .SelectionMode(NavSelectionMode.Single)
