@@ -1,4 +1,27 @@
-@page
-@using login4.Models
 
-<h2 class="content-block">Hola</h2>
+@page
+
+@*<span id="spanMsg"></span>
+
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        val1 = 5;
+        val2 = 2;
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("Add", "ClientesContactos")",
+            data: { number1: val1, number2: val2 },
+            dataType: "text",
+            success: function (msg){
+                document.getElementById("spanMsg").textContent = "Sum= " + msg;
+            },
+            error: function (req, status, error){
+                document.getElementById("spanMsg").textContent = "Sum= " + error;
+            }
+
+        })
+    }
+    
+);
+</script*@

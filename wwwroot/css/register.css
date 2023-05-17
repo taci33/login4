@@ -1,0 +1,15 @@
+﻿.btn-primary {
+    color: #fff;
+    background-color: #1b6ec2;
+    border-color: #1861ac;
+    width: 10%;
+    height: 20%;
+}
+
+section {
+    margin-left: 8%;
+}
+
+.form-control {
+    width: 15%;
+}

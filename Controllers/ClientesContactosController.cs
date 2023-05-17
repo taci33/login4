@@ -12,6 +12,17 @@ using System.Linq;
 using System.Threading.Tasks;
 using login4.Models.EF;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using System.Net.Mail;
+using login4.Pages;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.JSInterop;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Text;
+using Microsoft.VisualBasic;
+using System.Net;
+using System.Drawing.Text;
+
 
 namespace login4.Controllers
 {
@@ -19,12 +30,26 @@ namespace login4.Controllers
     [Route("api/[controller]/[action]")]
     
     public class ClientesContactosController : Controller
-    {
-        private IntranetSenasaData230209Context _context;
 
-        public ClientesContactosController(IntranetSenasaData230209Context context) {
+    {
+        private readonly UserManager<IdentityUser> _userManager;
+        private IntranetSenasaData230209Context _context;
+        private readonly IUserStore<IdentityUser> _userStore;
+        private readonly IUserEmailStore<IdentityUser> _emailStore;
+
+        public object JsonRequestBehavior { get; private set; }
+
+        public ClientesContactosController(
+            UserManager<IdentityUser> userManager,
+              IUserStore<IdentityUser> userStore,
+            IntranetSenasaData230209Context context )
+        {
+            _userManager = userManager;
             _context = context;
+            _userStore = userStore;
+            _emailStore = GetEmailStore();
         }
+
 
         [HttpGet]
         public async Task<IActionResult> Get(DataSourceLoadOptions loadOptions) {
@@ -89,6 +114,7 @@ namespace login4.Controllers
 
             _context.ClientesContactos.Remove(model);
             await _context.SaveChangesAsync();
+            
         }
 
 
@@ -164,6 +190,150 @@ namespace login4.Controllers
             }
 
             return String.Join(" ", messages);
+        }
+        [HttpPost]
+        public async Task<IActionResult> Bloquear(string email)
+        {
+     
+            var user = await _userManager.FindByEmailAsync(email);
+
+        if(!user.LockoutEnabled) { 
+            var EndDate = new DateTime(2222, 06, 06);
+            var lockUserTask = _userManager.SetLockoutEnabledAsync(user, true);
+            lockUserTask.Wait();
+
+            var lockDateTask = _userManager.SetLockoutEndDateAsync(user, EndDate);
+            lockDateTask.Wait();
+             
+            Response.StatusCode = (int)HttpStatusCode.OK;
+            return Json("usuario " + ((appusuario)user).IDpersona + " bloqueado indefinidamente");
+            } else
+                {
+                
+                var LockoutEndDateTask = _userManager.SetLockoutEndDateAsync(user, null);
+                LockoutEndDateTask.Wait();
+                var lockDisabledTask = _userManager.SetLockoutEnabledAsync(user, false);
+                lockDisabledTask.Wait();
+               
+                Response.StatusCode = (int)HttpStatusCode.OK;
+                return Json("usuario= " + ((appusuario)user).IDpersona + "desbloqueado");
+                }
+        
+        }
+        [HttpPost]
+        public async Task<IActionResult> Registrar(string email, string nombre, string idpersona)
+        {
+            //if (_userManager.FindByEmailAsync(email).IsCompletedSuccessfully)
+            //{
+                try
+                {
+                    //Generar una contraseña aleatoria
+                    var password = GenerateRandomPassword();
+
+                    // Crear un nuevo usuario
+                    var user = new appusuario
+                    {
+                        Nombre = nombre,
+                        IDpersona = idpersona,
+                        RolAcceso = "usuario"
+
+                    };
+                    await _userStore.SetUserNameAsync(user, email, CancellationToken.None);
+                    await _emailStore.SetEmailAsync(user, email, CancellationToken.None);
+                    var result = await _userManager.CreateAsync(user, password);
+
+                    if (result.Succeeded)
+                    {
+
+                        var userId = await _userManager.GetUserIdAsync(user);
+                        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                        var confirmacion = await _userManager.ConfirmEmailAsync(user, code);
+                        var lockDisabledTask = _userManager.SetLockoutEnabledAsync(user, false);
+                        lockDisabledTask.Wait();//confirmo temporalmente el email tal cual se registran
+                        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                        // Enviar la contraseña por correo electrónico
+                        //await SendPasswordByEmail(user, password);
+                        // El usuario se registró correctamente y la contraseña se envió por correo electrónico
+                        // Realiza cualquier otra acción necesaria
+                    }
+                    else
+                    {
+
+                        //string st = (IActionResult)result.Errors.ToString();
+                        //return (IActionResult)result.Errors;
+                        foreach (var error in result.Errors)
+                        {
+                            ModelState.AddModelError(string.Empty, error.Description);
+                        }
+                        // Ocurrió un error durante el registro del usuario
+
+                    }
+                    //return Json(new { success = true, responseText = "Todo Ok!" }, JsonRequestBehavior.AllowGet);
+                    Response.StatusCode = (int)HttpStatusCode.OK;
+                    return Json("contraseña= " + password);
+                    // View().ExecuteResult();// RedirectToPageToPage("/DataGrids/clientesC");
+                    //return (IActionResult)result; //.Errors;
+                }
+                catch (Exception ex)
+                {
+                    // Ocurrió una excepción no controlada
+                    // Manejar la excepción adecuadamente
+                    ModelState.AddModelError("", ex.Message);
+
+
+
+                    // Devuelve una respuesta con el mensaje de error al cliente
+                    return View();
+                }
+        //}else
+        //    return Json("El usuario ya estaba registrado");
+
+        //return View();
+    }
+            private string GenerateRandomPassword()
+            {
+            // Generar una contraseña aleatoria utilizando caracteres alfanuméricos
+                var minus = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+                var numeros = "1234567890";
+                var especiales = ",._/*+-@#";
+                var random = new Random();
+                var letras = new string(Enumerable.Repeat(minus, 8)
+                      .Select(s => s[random.Next(s.Length)]).ToArray());
+                var num = new string(Enumerable.Repeat(numeros, 4)
+                        .Select(s => s[random.Next(s.Length)]).ToArray());
+                var esp = new string(Enumerable.Repeat(especiales, 2)
+                        .Select(s => s[random.Next(s.Length)]).ToArray());
+                var password = letras + num + esp;
+
+            return password;
+            }
+
+            //private async Task SendPasswordByEmail(IdentityUser user, string password)
+            //{
+            //    // Aquí debes implementar la lógica para enviar un correo electrónico
+            //    // Puedes utilizar una biblioteca de envío de correos electrónicos como SendGrid o la configuración de correo electrónico predeterminada en ASP.NET Core
+
+            //    // Ejemplo de implementación con SendGrid:
+            //    //var msg = new SendGridMessage();
+            //    //msg.SetFrom(new EmailAddress("from@example.com", "Your Name"));
+            //    //msg.AddTo(new EmailAddress(user.Email, user.UserName));
+            //    //msg.SetSubject("Registration Confirmation");
+            //    //msg.AddContent(MimeType.Text, $"Hello {user.UserName}, your password is: {password}");
+
+            //    //var client = new SendGridClient("YOUR_SENDGRID_API_KEY");
+            //    //await client.SendEmailAsync(msg);
+            //}
+
+
+
+       
+            private IUserEmailStore<IdentityUser> GetEmailStore()
+        {
+            if (!_userManager.SupportsUserEmail)
+            {
+                throw new NotSupportedException("The default UI requires a user store with email support.");
+            }
+            return (IUserEmailStore<IdentityUser>)_userStore;
         }
     }
 }

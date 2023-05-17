@@ -3,13 +3,10 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace login4.Pages
 {
-    public class LoginExModel : PageModel
+    public class RegisterExModel : PageModel
     {
         public void OnGet()
         {
-
-
-
         }
     }
 }

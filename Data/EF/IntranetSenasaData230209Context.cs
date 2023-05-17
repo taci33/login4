@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using login4.Pages;
+using Microsoft.Data.SqlClient;
+
 namespace login4.Models.EF;
 
 public partial class IntranetSenasaData230209Context : IdentityDbContext
@@ -16,6 +19,16 @@ public partial class IntranetSenasaData230209Context : IdentityDbContext
     {
     }
 
+
+    public virtual DbSet<ext_adm_CL_Search> ext_adm_CL_Searchs { get; set; }
+    //public virtual List<ext_adm_CL_Search> ExtAdmClSearch(int idTipo, bool lockoutEnabled)
+    //{
+    //    return ext_adm_CL_Searchs.FromSqlRaw("exec dbo.ext_adm_CL_Search @IDTipo, @LockoutEnabled",
+    //        new SqlParameter("@IDTipo", idTipo),
+    //        new SqlParameter("@LockoutEnabled", lockoutEnabled))
+    //        .ToList();
+    //}
+    public DbSet<appusuario> appusuario { get; set; }
     public virtual DbSet<AeEntidade> AeEntidades { get; set; }
 
     public virtual DbSet<AeatM303> AeatM303s { get; set; }
@@ -1261,13 +1274,34 @@ public partial class IntranetSenasaData230209Context : IdentityDbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<IdentityUser>().ToTable("ClientesUsers")/*.Property(b => b.Id).HasColumnName("PersonaID")*/;
+        modelBuilder.Entity<IdentityUser>().ToTable("ClientesUsers");
         modelBuilder.Entity<IdentityRole>().ToTable("clientesRole");
         modelBuilder.Entity<IdentityUserRole<string>>().ToTable("clientesUserRole");
         modelBuilder.Entity<IdentityUserClaim<string>>().ToTable("clientesUserClaim");
         modelBuilder.Entity<IdentityUserLogin<string>>().ToTable("clientesUserLogin");
         modelBuilder.Entity<IdentityUserToken<string>>().ToTable("clientesUsertoken");
         modelBuilder.Entity<IdentityRoleClaim<string>>().ToTable("clientesroleclaim");
+
+        modelBuilder.Entity<ext_adm_CL_Search>(entity =>
+        {
+            entity.HasKey(e => e.IDPersona);
+
+            entity.ToView("ext_adm_CL_Search"); //Indica que la entidad está mapeada a la vista ext_adm_CL_Search
+
+            // Configura las propiedades correspondientes a las columnas de la vista
+            entity.Property(e => e.IDPersona).HasColumnName("IDPersona");
+            entity.Property(e => e.Nombre).HasColumnName("Nombre");
+            entity.Property(e => e.NombreComercial).HasColumnName("NombreComercial");
+            entity.Property(e => e.Telefono).HasColumnName("Telefono");
+            entity.Property(e => e.Fax).HasColumnName("Fax");
+            entity.Property(e => e.CIF_NIF).HasColumnName("CIF_NIF");
+            entity.Property(e => e.Email).HasColumnName("Email");
+            entity.Property(e => e.PaginaWeb).HasColumnName("PaginaWeb");
+            entity.Property(e => e.UsuarioRegistrado).HasColumnName("UsuarioRegistrado");
+            entity.Property(e => e.TipoDeCliente).HasColumnName("Tipo de Cliente");
+            entity.Property(e => e.TipoID).HasColumnName("TipoID");
+            entity.Property(e => e.LockoutEnabled).HasColumnName("LockoutEnabled");
+        });
 
         modelBuilder.Entity<AeEntidade>(entity =>
         {

@@ -1,6 +1,7 @@
 using login4.Models.EF;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using login4.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,9 +9,14 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("Intranet_Senasa Data_230209Connection");
 builder.Services.AddDbContext<IntranetSenasaData230209Context>(options =>
     options.UseSqlServer(connectionString));
+builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-    .AddEntityFrameworkStores<IntranetSenasaData230209Context>();
+
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = false)
+    .AddEntityFrameworkStores<IntranetSenasaData230209Context>()
+    .AddDefaultTokenProviders();
+builder.Services.AddScoped<UserManager<IdentityUser>>();
+builder.Services.AddScoped<ClientesContactosController>();
 
 builder.Services
     .AddRazorPages(/*options => options.Conventions.AuthorizePage("/Pages/About")*/)

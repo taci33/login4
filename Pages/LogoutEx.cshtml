@@ -1,0 +1,27 @@
+﻿@page
+@model Areas.Identity.Pages.Account.LogoutModel
+@{
+    ViewData["Title"] = "Log out";
+}
+<head>
+    <link rel="stylesheet" href="~/css/logout.css" />
+</head>
+
+<header>
+
+    <section>
+    <h3>@ViewData["Title"]</h3>
+    @{
+        if (User.Identity?.IsAuthenticated ?? false)
+        {
+            <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post">
+                <button type="submit" class="nav-link btn btn-link text-dark">Click aqui para salir</button>
+            </form>
+        }
+        else
+        {
+            <p>Ha cerrado correctamente la sesión de la aplicación.</p>
+        }
+        }
+    </section>
+</header>

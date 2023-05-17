@@ -1,0 +1,15 @@
+﻿section {
+    margin-left: 8%;
+}
+.btn {
+    color:orangered;
+    border: 1px solid orangered;
+    background-color:#fff;
+    width: 10%;
+    height: 20%;
+    transition-duration: 0.4s;
+}
+.btn:hover{
+    background-color: orangered;
+    color: white;
+}

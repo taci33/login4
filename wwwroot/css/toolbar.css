@@ -1,0 +1,14 @@
+﻿.dx-toolbar a {
+    margin-right: 15px;
+    
+}
+
+.dx-toolbar i {
+    font-size: large;
+}
+
+
+.dx-toolbar a:hover {
+    color: white;
+    background-color: orangered;
+}
