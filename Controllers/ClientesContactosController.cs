@@ -22,7 +22,9 @@ using System.Text;
 using Microsoft.VisualBasic;
 using System.Net;
 using System.Drawing.Text;
-
+using login4.Controllers;
+using login4.Services.EmailService;
+using login4.Models;
 
 namespace login4.Controllers
 {
@@ -36,14 +38,16 @@ namespace login4.Controllers
         private IntranetSenasaData230209Context _context;
         private readonly IUserStore<IdentityUser> _userStore;
         private readonly IUserEmailStore<IdentityUser> _emailStore;
-
+        private readonly IEmailService _emailService;
         public object JsonRequestBehavior { get; private set; }
 
         public ClientesContactosController(
             UserManager<IdentityUser> userManager,
               IUserStore<IdentityUser> userStore,
-            IntranetSenasaData230209Context context )
+            IntranetSenasaData230209Context context, 
+            IEmailService emailService)
         {
+            _emailService = emailService;
             _userManager = userManager;
             _context = context;
             _userStore = userStore;
@@ -223,20 +227,18 @@ namespace login4.Controllers
         [HttpPost]
         public async Task<IActionResult> Registrar(string email, string nombre, string idpersona)
         {
-            //if (_userManager.FindByEmailAsync(email).IsCompletedSuccessfully)
-            //{
-                try
-                {
+            
+            if (await _userManager.FindByEmailAsync(email)== null)
+            {
+                try{
                     //Generar una contraseña aleatoria
                     var password = GenerateRandomPassword();
-
                     // Crear un nuevo usuario
                     var user = new appusuario
                     {
                         Nombre = nombre,
                         IDpersona = idpersona,
                         RolAcceso = "usuario"
-
                     };
                     await _userStore.SetUserNameAsync(user, email, CancellationToken.None);
                     await _emailStore.SetEmailAsync(user, email, CancellationToken.None);
@@ -244,7 +246,6 @@ namespace login4.Controllers
 
                     if (result.Succeeded)
                     {
-
                         var userId = await _userManager.GetUserIdAsync(user);
                         var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                         var confirmacion = await _userManager.ConfirmEmailAsync(user, code);
@@ -252,44 +253,40 @@ namespace login4.Controllers
                         lockDisabledTask.Wait();//confirmo temporalmente el email tal cual se registran
                         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                         // Enviar la contraseña por correo electrónico
-                        //await SendPasswordByEmail(user, password);
-                        // El usuario se registró correctamente y la contraseña se envió por correo electrónico
-                        // Realiza cualquier otra acción necesaria
-                    }
-                    else
-                    {
+                        var cuerpo = "su correo " + email + " ha sido registrado en la intranet con contraseña: " + password;
 
-                        //string st = (IActionResult)result.Errors.ToString();
-                        //return (IActionResult)result.Errors;
+                        var mail = new EmailDto
+                        {
+                            To = email,
+                            Subject = "prueba",
+                            Body = cuerpo
+                        };
+                       
+                        _emailService.SendEmail(mail);
+                        
+                    }
+
+                    else{
                         foreach (var error in result.Errors)
                         {
                             ModelState.AddModelError(string.Empty, error.Description);
                         }
-                        // Ocurrió un error durante el registro del usuario
-
                     }
-                    //return Json(new { success = true, responseText = "Todo Ok!" }, JsonRequestBehavior.AllowGet);
                     Response.StatusCode = (int)HttpStatusCode.OK;
                     return Json("contraseña= " + password);
-                    // View().ExecuteResult();// RedirectToPageToPage("/DataGrids/clientesC");
-                    //return (IActionResult)result; //.Errors;
                 }
                 catch (Exception ex)
                 {
-                    // Ocurrió una excepción no controlada
                     // Manejar la excepción adecuadamente
                     ModelState.AddModelError("", ex.Message);
-
-
-
                     // Devuelve una respuesta con el mensaje de error al cliente
                     return View();
                 }
-        //}else
-        //    return Json("El usuario ya estaba registrado");
+            }
+            else
+                return Json("El usuario ya estaba registrado");
 
-        //return View();
-    }
+        }
             private string GenerateRandomPassword()
             {
             // Generar una contraseña aleatoria utilizando caracteres alfanuméricos
@@ -308,26 +305,26 @@ namespace login4.Controllers
             return password;
             }
 
-            //private async Task SendPasswordByEmail(IdentityUser user, string password)
-            //{
-            //    // Aquí debes implementar la lógica para enviar un correo electrónico
-            //    // Puedes utilizar una biblioteca de envío de correos electrónicos como SendGrid o la configuración de correo electrónico predeterminada en ASP.NET Core
+        //private async Task SendPasswordByEmail(IdentityUser user, string password)
+        //{
+        //    //Aquí debes implementar la lógica para enviar un correo electrónico
+        //    // Puedes utilizar una biblioteca de envío de correos electrónicos como SendGrid o la configuración de correo electrónico predeterminada en ASP.NET Core
 
-            //    // Ejemplo de implementación con SendGrid:
-            //    //var msg = new SendGridMessage();
-            //    //msg.SetFrom(new EmailAddress("from@example.com", "Your Name"));
-            //    //msg.AddTo(new EmailAddress(user.Email, user.UserName));
-            //    //msg.SetSubject("Registration Confirmation");
-            //    //msg.AddContent(MimeType.Text, $"Hello {user.UserName}, your password is: {password}");
+        //    // Ejemplo de implementación con SendGrid:
+        //    var msg = new SendGridMessage();
+        //    msg.SetFrom(new EmailAddress("from@example.com", "Your Name"));
+        //    msg.AddTo(new EmailAddress(user.Email, user.UserName));
+        //    msg.SetSubject("Registration Confirmation");
+        //    msg.AddContent(MimeType.Text, $"Hello {user.UserName}, your password is: {password}");
 
-            //    //var client = new SendGridClient("YOUR_SENDGRID_API_KEY");
-            //    //await client.SendEmailAsync(msg);
-            //}
+        //    var client = new SendGridClient("YOUR_SENDGRID_API_KEY");
+        //    await client.SendEmailAsync(msg);
+        //}
 
 
 
-       
-            private IUserEmailStore<IdentityUser> GetEmailStore()
+
+        private IUserEmailStore<IdentityUser> GetEmailStore()
         {
             if (!_userManager.SupportsUserEmail)
             {

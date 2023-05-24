@@ -2,6 +2,8 @@ using login4.Models.EF;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using login4.Controllers;
+using login4.Services.EmailService;
+using login4.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,7 +19,7 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => options.Sign
     .AddDefaultTokenProviders();
 builder.Services.AddScoped<UserManager<IdentityUser>>();
 builder.Services.AddScoped<ClientesContactosController>();
-
+builder.Services.AddScoped<IEmailService, Emailservice>();
 builder.Services
     .AddRazorPages(/*options => options.Conventions.AuthorizePage("/Pages/About")*/)
     .AddJsonOptions(options => options.JsonSerializerOptions.PropertyNamingPolicy = null);

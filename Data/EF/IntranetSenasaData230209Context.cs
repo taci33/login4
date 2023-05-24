@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using login4.Pages;
 using Microsoft.Data.SqlClient;
+using login4.Data.EF;
 
 namespace login4.Models.EF;
 
@@ -18,16 +19,9 @@ public partial class IntranetSenasaData230209Context : IdentityDbContext
         : base(options)
     {
     }
-
-
+    public virtual DbSet<EXT_adm_CL_email_lookup> EXT_adm_CL_email_lookups { get; set; }
+    public virtual DbSet<EXT_adm_CL_Tipos_lookup> EXT_adm_CL_Tipos_lookups { get; set; }
     public virtual DbSet<ext_adm_CL_Search> ext_adm_CL_Searchs { get; set; }
-    //public virtual List<ext_adm_CL_Search> ExtAdmClSearch(int idTipo, bool lockoutEnabled)
-    //{
-    //    return ext_adm_CL_Searchs.FromSqlRaw("exec dbo.ext_adm_CL_Search @IDTipo, @LockoutEnabled",
-    //        new SqlParameter("@IDTipo", idTipo),
-    //        new SqlParameter("@LockoutEnabled", lockoutEnabled))
-    //        .ToList();
-    //}
     public DbSet<appusuario> appusuario { get; set; }
     public virtual DbSet<AeEntidade> AeEntidades { get; set; }
 
@@ -1302,6 +1296,29 @@ public partial class IntranetSenasaData230209Context : IdentityDbContext
             entity.Property(e => e.TipoID).HasColumnName("TipoID");
             entity.Property(e => e.LockoutEnabled).HasColumnName("LockoutEnabled");
         });
+        modelBuilder.Entity<EXT_adm_CL_Tipos_lookup>(entity =>
+        {
+            entity.HasKey(e => e.IDTipo);
+
+            entity.ToView("EXT_adm_CL_Tipos_lookup"); //Indica que la entidad está mapeada a la vista ext_adm_CL_Search
+
+            // Configura las propiedades correspondientes a las columnas de la vista
+            entity.Property(e => e.IDTipo).HasColumnName("IDTipo");
+            entity.Property(e => e.Nombre).HasColumnName("Nombre");
+           
+        });
+        modelBuilder.Entity<EXT_adm_CL_email_lookup>(entity =>
+        {
+            entity.HasKey(e => e.IDContacto);
+
+            entity.ToView("EXT_adm_CL_email_lookup"); //Indica que la entidad está mapeada a la vista ext_adm_CL_Search
+
+            // Configura las propiedades correspondientes a las columnas de la vista
+            entity.Property(e => e.IDContacto).HasColumnName("IDContacto");
+            entity.Property(e => e.Email).HasColumnName("Email");
+            entity.Property(e => e.Descripcion).HasColumnName("Descripcion");
+        });
+
 
         modelBuilder.Entity<AeEntidade>(entity =>
         {

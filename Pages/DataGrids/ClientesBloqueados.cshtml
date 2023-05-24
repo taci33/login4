@@ -1,25 +1,23 @@
 ﻿@page
-@model login4.Pages.DataGrids.ClientesPAModel
-@{}
-   
+@model login4.Pages.DataGrids.ClientesBloqueadosModel
+@{
+}
+@(Html.DevExtreme().Lookup()
 
-
-    @(Html.DevExtreme().Lookup()
-        
         .DataSource(ds => ds
         .Mvc()
-        .Controller("Procedimiento")
+        .Controller("ClientesBloqueados")
         .LoadAction("GetTipo"))
         .ApplyValueMode(EditorApplyValueMode.Instantly)
         .ShowCancelButton(true)
         .ShowClearButton(true)
         .CancelButtonText("cancelar")
         .ClearButtonText("quitar filtro")
-        .ApplyButtonText("aplicar filtro")
+     
         .ValueExpr("IDTipo")
         .DisplayExpr("Nombre")
         .Value("todo")
-        
+
         .OnValueChanged(@<text>
             function(data) {
             var dataGrid = $("#gridContainer").dxDataGrid("instance");
@@ -27,24 +25,14 @@
             dataGrid.clearFilter();
             else
             dataGrid.filter(["TipoID", "=", data.value]);
-            }</text>
-        
-    )
-        
-       @* .OnValueChanged(@<text>
-            function(data) {
-                var dataGrid = $("#gridContainer").dxDataGrid("instance");
-                if (data.value == "All")
-                    dataGrid.clearFilter();
-                else
-                    dataGrid.filter(["Task_Status", "=", data.value]);
             }
-        </text>)*@
-    )
+        </text>
+
+    ))
 
 @(Html.DevExtreme().DataGrid<login4.Models.EF.ext_adm_CL_Search>()
     .DataSource(ds => ds.Mvc()
-        .Controller("Procedimiento")
+        .Controller("ClientesBloqueados")
         .LoadAction("Get")
     )
     .ID("gridContainer")
@@ -55,7 +43,7 @@
         pager.AllowedPageSizes(new[] { 5, 10, 20 });
         pager.ShowInfo(true);
     })
-    
+
     .RemoteOperations(true)
     .Sorting(sorting => sorting.Mode(GridSortingMode.Multiple))
     .Grouping(g => g.AutoExpandAll(false))
@@ -77,17 +65,17 @@
         columns.AddFor(m => m.CIF_NIF);
 
         columns.AddFor(m => m.Email)
-               
+
                 @*.SetCellValue("setEmailValue")*@
                 @*.Width(125)*@
-                
+
                 .Lookup(l => l
                     .DataSource("getEmail")
                     .DisplayExpr("Email")
                     .ValueExpr("IDContacto")
                     .AllowClearing(true)
                     )
-                    
+
                     .SetCellValue("setEmailValue")
                     .ShowEditorAlways(true)
                     .CalculateDisplayValue("Email");
@@ -140,27 +128,27 @@
         return {
             store: DevExpress.data.AspNet.createStore({
                 key: "IDContacto",
-                loadUrl: '@Url.Action("GetEmail", "Procedimiento", new { httproute = true, IDPersona = "__IDPersona__"})'
+                loadUrl: '@Url.Action("GetEmail", "ClientesBloqueados", new { httproute = true, IDPersona = "__IDPersona__"})'
                     .replace("__IDPersona__", IDPersona),
                 loadParams: { IDPersona: IDPersona }
-                     
+
             }),
-            
-        }; 
-        }
-    
-        //filter: options.data ? ["IDPersona", "=", options.data.IDPersona] : null
-        //console.log(options);
-        //if (!options.data) return null;
-        //var store = {
-        //    store: DevExpress.data.AspNet.createStore({
-        //        key: "IDPersona",
-        //        loadUrl: '/Controllers/Procedimiento/GetEmail?IDPersona=' + options.data.IDPersona
-        //    })
-        //};
-        //console.log(store);
-        //return store;
-  
+
+        };
+    }
+
+    //filter: options.data ? ["IDPersona", "=", options.data.IDPersona] : null
+    //console.log(options);
+    //if (!options.data) return null;
+    //var store = {
+    //    store: DevExpress.data.AspNet.createStore({
+    //        key: "IDPersona",
+    //        loadUrl: '/Controllers/Procedimiento/GetEmail?IDPersona=' + options.data.IDPersona
+    //    })
+    //};
+    //console.log(store);
+    //return store;
+
     function onClick(e) {
         //var grid = e.component
         //var selectedData = grid.getSelectedRowsData()[0]
@@ -185,9 +173,9 @@
         });
     }
     function BloquearOnClick(e) {
-      
+
         var email = e.row.cells[6].text
- 
+
         $.ajax({
             type: "POST",
             url: "@Url.Action("Bloquear", "ClientesContactos")",

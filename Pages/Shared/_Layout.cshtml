@@ -199,13 +199,19 @@
                     if (SignInManager.IsSignedIn(User))
                     {
                         items.Add()
-                        .Text("Proc. Almacenado")
+                        .Text("Clientes")
                         .Icon("folder")
                         .Option("path", GetAspUrl("/DataGrids/ClientesPA"))
                         .Selected(IsCurrentUrl("/DataGrids/ClientesPA"));
 
                         items.Add()
-                        .Text("Clientes")
+                        .Text("ClientesBloqueados")
+                        .Icon("folder")
+                        .Option("path", GetAspUrl("/DataGrids/ClientesBloqueados"))
+                        .Selected(IsCurrentUrl("/DataGrids/ClientesBloqueados"));
+
+                        items.Add()
+                        .Text("ClientesContactos")
                         .Icon("folder")
                         .Option("path", GetAspUrl("/DataGrids/Clientesc"))
                         .Selected(IsCurrentUrl("/DataGrids/Clientesc"));

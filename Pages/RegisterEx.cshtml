@@ -12,41 +12,44 @@
     <section>
     <div class="col-md-4">
             <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-                <h2>Create a new account.65983254aA.</h2>
+                <h2>Crear cuenta nueva</h2>
                 <hr />
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <div class="form-floating">
+                    <label asp-for="Input.Email"><b>Email</b> <br /></label>
                     <input asp-for="Input.Email" class="form-control" autocomplete="email" aria-required="true" />
-                    <label asp-for="Input.Email"></label>
                     <span asp-validation-for="Input.Email" class="text-danger"></span>
                 </div>
+               
                 <div class="form-floating">
+                    <label asp-for="Input.Nombre"><b>Nombre</b> <br /></label>
                     <input asp-for="Input.Nombre" class="form-control" autocomplete="Nombre" aria-required="true" />
-                    <label asp-for="Input.Nombre"></label>
                     <span asp-validation-for="Input.Nombre" class="text-danger"></span>
                 </div>
-                <div>
-
-                    <input asp-for="Input.RolAcceso" type="radio" value="Cliente" />Cliente<br />
-                    <input asp-for="Input.RolAcceso" type="radio" value="Usuario" />Usuario<br />
-                    <input asp-for="Input.RolAcceso" type="radio" value="Administrador" />Administrador<br />
-                </div>
+               
                 <div class="form-floating">
+                    <label asp-for="Input.IDpersona"><b>IDpersona</b> <br /></label>
                     <input asp-for="Input.IDpersona" class="form-control" autocomplete="off" aria-required="true" />
-                    <label asp-for="Input.IDpersona"></label>
                     <span asp-validation-for="Input.IDpersona" class=" text-danger"></span>
                 </div>
                 <div class="form-floating">
+                    <label asp-for="Input.Password"><b>Contraseña</b> <br /></label>
                     <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" />
-                    <label asp-for="Input.Password"></label>
                     <span asp-validation-for="Input.Password" class="text-danger"></span>
                 </div>
                 <div class="form-floating">
+                    <label asp-for="Input.ConfirmPassword"><b>Confirmar contraseña</b> <br /></label>
                     <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" />
-                    <label asp-for="Input.ConfirmPassword"></label>
                     <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+                </div> 
+                <div>
+
+                    <input asp-for="Input.RolAcceso" type="radio" value="Cliente" /><b>Cliente</b><br />
+                    <input asp-for="Input.RolAcceso" type="radio" value="Usuario" /><b>Usuario</b><br />
+                    <input asp-for="Input.RolAcceso" type="radio" value="Administrador" /><b>Administrador</b><br />
                 </div>
-                <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
+                <br />
+                <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Registrar</button>
             </form>
         @*<form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
             <h2>Registrar nuevo usuario</h2>
