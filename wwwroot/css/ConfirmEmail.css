@@ -1,0 +1,19 @@
+﻿.row{
+    margin: 5em;
+}
+.titulo {
+    color: #ff5722;
+    margin-left:2em;
+
+}
+.form-floating{
+    width:15em;
+}
+.btn-primary{
+color: #fff;
+background-color: #1b6ec2;
+border-color: #1861ac;
+width: 12.5em;
+height: 20%;
+margin-top:1em;
+}

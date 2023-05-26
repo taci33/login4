@@ -25,6 +25,8 @@ using System.Drawing.Text;
 using login4.Controllers;
 using login4.Services.EmailService;
 using login4.Models;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using System.Text.Encodings.Web;
 
 namespace login4.Controllers
 {
@@ -195,6 +197,11 @@ namespace login4.Controllers
 
             return String.Join(" ", messages);
         }
+
+
+
+
+
         [HttpPost]
         public async Task<IActionResult> Bloquear(string email)
         {
@@ -227,7 +234,10 @@ namespace login4.Controllers
         [HttpPost]
         public async Task<IActionResult> Registrar(string email, string nombre, string idpersona)
         {
-            
+
+            string returnUrl = null;
+            returnUrl ??= Url.Content("~/");
+
             if (await _userManager.FindByEmailAsync(email)== null)
             {
                 try{
@@ -248,29 +258,52 @@ namespace login4.Controllers
                     {
                         var userId = await _userManager.GetUserIdAsync(user);
                         var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                        var confirmacion = await _userManager.ConfirmEmailAsync(user, code);
+                        //var confirmacion = await _userManager.ConfirmEmailAsync(user, code);//confirmo temporalmente el email tal cual se registran
                         var lockDisabledTask = _userManager.SetLockoutEnabledAsync(user, false);
-                        lockDisabledTask.Wait();//confirmo temporalmente el email tal cual se registran
+                        lockDisabledTask.Wait();
                         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                         // Enviar la contraseña por correo electrónico
-                        var cuerpo = "su correo " + email + " ha sido registrado en la intranet con contraseña: " + password;
 
+                        //var confirmationLink = Url.Action(nameof(ConfirmEmail()), "Pages", new { code, email = user.Email }, Request.Scheme);
+                        //var message = new Message(new string[] { user.Email }, "Confirmation email link", confirmationLink, null);
+                        //await _emailSender.SendEmailAsync(message);
+
+                        //var callbackUrl = Url.Page(
+                        //"/GestionUsuarios/ConfirmarEmail",
+                        //pageHandler: null,
+                        //values: new { area = "Pages", userId = userId, code = code, returnUrl = returnUrl },
+                        //protocol: Request.Scheme);
+                        var callbackUrl = Url.Page(
+                      "/Account/ConfirmEmail",
+                      pageHandler: null,
+                      values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
+                      protocol: Request.Scheme);
+
+
+
+
+                        var cuerpo = "su correo " + email + " ha sido registrado. Introduzca su nueva contraseña a traves del siguiente link:" +
+                            $" <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>Pulse aquí</a>.";
+
+                        //var cuerpo = "su correo " + email + " ha sido registrado en la intranet con contraseña: " + password + "  " + confirmationLink;
                         var mail = new EmailDto
                         {
-                            To = email,
+                            To = /*email*/"aalbertosanzcarmen@gmail.com",
                             Subject = "prueba",
                             Body = cuerpo
                         };
-                       
-                        _emailService.SendEmail(mail);
                         
+                        _emailService.SendEmail(mail);
+                        //return RedirectToAction(nameof(SuccessRegistration));
                     }
-
-                    else{
+                    
+                    else
+                    {
                         foreach (var error in result.Errors)
                         {
                             ModelState.AddModelError(string.Empty, error.Description);
                         }
+
                     }
                     Response.StatusCode = (int)HttpStatusCode.OK;
                     return Json("contraseña= " + password);
@@ -305,21 +338,16 @@ namespace login4.Controllers
             return password;
             }
 
-        //private async Task SendPasswordByEmail(IdentityUser user, string password)
-        //{
-        //    //Aquí debes implementar la lógica para enviar un correo electrónico
-        //    // Puedes utilizar una biblioteca de envío de correos electrónicos como SendGrid o la configuración de correo electrónico predeterminada en ASP.NET Core
-
-        //    // Ejemplo de implementación con SendGrid:
-        //    var msg = new SendGridMessage();
-        //    msg.SetFrom(new EmailAddress("from@example.com", "Your Name"));
-        //    msg.AddTo(new EmailAddress(user.Email, user.UserName));
-        //    msg.SetSubject("Registration Confirmation");
-        //    msg.AddContent(MimeType.Text, $"Hello {user.UserName}, your password is: {password}");
-
-        //    var client = new SendGridClient("YOUR_SENDGRID_API_KEY");
-        //    await client.SendEmailAsync(msg);
-        //}
+        [HttpGet]
+        public async Task<IActionResult> ConfirmEmail(string token, string email)
+        {
+            return View();
+        }
+        [HttpGet]
+        public IActionResult SuccessRegistration()
+        {
+            return View();
+        }
 
 
 

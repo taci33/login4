@@ -14,7 +14,7 @@ builder.Services.AddDbContext<IntranetSenasaData230209Context>(options =>
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = false)
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<IntranetSenasaData230209Context>()
     .AddDefaultTokenProviders();
 builder.Services.AddScoped<UserManager<IdentityUser>>();

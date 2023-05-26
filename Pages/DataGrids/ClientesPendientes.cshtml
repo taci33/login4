@@ -1,19 +1,19 @@
 ﻿@page
-@model login4.Pages.DataGrids.ClientesBloqueadosModel
+@model login4.Pages.DataGrids.ClientesPendientesModel
 @{
 }
 @(Html.DevExtreme().Lookup()
 
         .DataSource(ds => ds
         .Mvc()
-        .Controller("ClientesBloqueados")
+        .Controller("ClientesPendientes")
         .LoadAction("GetTipo"))
         .ApplyValueMode(EditorApplyValueMode.Instantly)
         .ShowCancelButton(true)
         .ShowClearButton(true)
         .CancelButtonText("cancelar")
         .ClearButtonText("quitar filtro")
-     
+
         .ValueExpr("IDTipo")
         .DisplayExpr("Nombre")
         .Value("todo")
@@ -32,7 +32,7 @@
 
 @(Html.DevExtreme().DataGrid<login4.Models.EF.ext_adm_CL_Search>()
     .DataSource(ds => ds.Mvc()
-        .Controller("ClientesBloqueados")
+        .Controller("ClientesPendientes")
         .LoadAction("Get")
      )
     .FilterRow(filterRow => filterRow
@@ -107,7 +107,7 @@
       {
           btns.Add().Name(GridColumnButtonName.Edit);
           btns.Add().Name(GridColumnButtonName.Delete);
-          btns.Add()
+         @* btns.Add()
           .Name("Desregistrar")
           .Hint("Desregistrar")
           .Icon("clear")
@@ -116,14 +116,14 @@
          .Name("Desbloquear")
          .Hint("Desbloquear")
          .Icon("unlock")
-         .OnClick("BloquearOnClick");
+         .OnClick("BloquearOnClick");*@
       });
     })
       .Editing(editing =>
       {
           editing.Mode(GridEditMode.Cell);
           editing.AllowUpdating(true);
-         
+
       })
 )
 
@@ -147,46 +147,46 @@
         };
     }
 
-    
 
-    function onClick(e) {
-        //var grid = e.component
-        //var selectedData = grid.getSelectedRowsData()[0]
-        //var email = selectedData.Email
-        var email = e.row.cells[6].text
-        var nombre = e.row.cells[1].text
-        var idpersona = e.row.cells[0].text
-        $.ajax({
-            type: "POST",
-            url: "@Url.Action("Desregistrar", "ClientesBloqueados")",
-            data: {
-                email: email
-            },
-            success: function (msg) {
-                window.alert(msg + " " + email);
-            },
-            error: function (req, status, error) {
-                window.alert(email + " error= " + error);
-            }
-        });
-    }
-    function BloquearOnClick(e) {
 
-        var email = e.row.cells[6].text
+    //function onClick(e) {
+    //    //var grid = e.component
+    //    //var selectedData = grid.getSelectedRowsData()[0]
+    //    //var email = selectedData.Email
+    //    var email = e.row.cells[6].text
+    //    var nombre = e.row.cells[1].text
+    //    var idpersona = e.row.cells[0].text
+    //    $.ajax({
+    //        type: "POST",
+    //        url: "@Url.Action("Desregistrar", "ClientesBloqueados")",
+    //        data: {
+    //            email: email
+    //        },
+    //        success: function (msg) {
+    //            window.alert(msg + " " + email);
+    //        },
+    //        error: function (req, status, error) {
+    //            window.alert(email + " error= " + error);
+    //        }
+    //    });
+    //}
+//    function BloquearOnClick(e) {
 
-        $.ajax({
-            type: "POST",
-            url: "@Url.Action("Bloquear", "ClientesContactos")",
-            data: {
-                email: email
-            },
-            success: function (msg) {
-                window.alert(msg);
-            },
-            error: function (req, status, error) {
-                window.alert(email + " error= " + error);
-            }
-        });
+//        var email = e.row.cells[6].text
 
-    }
-</script>
+//        $.ajax({
+//            type: "POST",
+//            url: "@Url.Action("Bloquear", "ClientesContactos")",
+//            data: {
+//                email: email
+//            },
+//            success: function (msg) {
+//                window.alert(msg);
+//            },
+//            error: function (req, status, error) {
+//                window.alert(email + " error= " + error);
+//            }
+//        });
+
+//    }
+//</script>

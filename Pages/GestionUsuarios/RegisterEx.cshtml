@@ -9,11 +9,13 @@
 
 
 <div class="row">
+    <h2 class="reg">Crear cuenta nueva</h2>
+    <hr />
     <section>
     <div class="col-md-4">
             <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-                <h2>Crear cuenta nueva</h2>
-                <hr />
+                
+                
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <div class="form-floating">
                     <label asp-for="Input.Email"><b>Email</b> <br /></label>

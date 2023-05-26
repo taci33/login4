@@ -1,4 +1,8 @@
-﻿.btn-primary {
+﻿.reg {
+    color: #ff5722;
+    margin-left: 2em;
+}
+.btn-primary {
     color: #fff;
     background-color: #1b6ec2;
     border-color: #1861ac;

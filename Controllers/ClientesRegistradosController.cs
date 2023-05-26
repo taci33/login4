@@ -1,25 +1,19 @@
 ﻿using DevExtreme.AspNet.Data;
 using DevExtreme.AspNet.Mvc;
 using login4.Models.EF;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Caching.Memory;
 using System.Data;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.WebUtilities;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
-using static NuGet.Packaging.PackagingConstants;
-
 
 namespace login4.Controllers
 {
-    public class ClientesBloqueados : Controller
+    [Route("api/[controller]/[action]")]
+    public class ClientesRegistradosController : Controller
     {
         private IntranetSenasaData230209Context _context;
-
-        public ClientesBloqueados(IntranetSenasaData230209Context context, IHttpContextAccessor httpContextAccessor, IMemoryCache memoryCache)
+        public ClientesRegistradosController(IntranetSenasaData230209Context context, IHttpContextAccessor httpContextAccessor, IMemoryCache memoryCache)
         {
             _context = context;
         }
@@ -30,7 +24,7 @@ namespace login4.Controllers
             {
                 var clientIdParameter = new SqlParameter("@IDTipo", SqlDbType.Int);
                 clientIdParameter.Value = DBNull.Value;
-                var clientIdParameter2 = new SqlParameter("@LockoutEnabled", true);
+                var clientIdParameter2 = new SqlParameter("@LockoutEnabled", false);
                 var clientes = _context.ext_adm_CL_Searchs
                 .FromSqlRaw("exec ext_adm_CL_Search @IDTipo,@LockoutEnabled", clientIdParameter, clientIdParameter2)
                 .AsEnumerable().Select(i => new
@@ -57,6 +51,8 @@ namespace login4.Controllers
                 return Json(DataSourceLoader.Load(clientes, loadOptions));
             }
         }
+
+
         [HttpGet]
         public object GetTipo(DataSourceLoadOptions loadOptions)
         {
@@ -113,16 +109,11 @@ namespace login4.Controllers
             }
         }
 
-        //void PopulateModel(ext_adm_CL_Search cliente, IDictionary values)
-        //{
-        //    if (values.Contains("IDPersona"))
-        //        cliente.TipoID = Convert.ToInt32(values["IDPersona"]);
 
-        //    if (values.Contains("Nombre"))
-        //        cliente.Nombre = Convert.ToString(values["Nombre"]);
-        //}
+
+
+
 
     }
 }
 
-   

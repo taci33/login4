@@ -7,7 +7,10 @@ a {
     border-color: #0077cc;
     box-shadow: 0 0 0 0.2rem #0077cc;
 }*/
-
+.titulo {
+    color: #ff5722;
+    margin-left: 2em;
+}
 .btn-primary {
     color: #fff;
     background-color: #1b6ec2;
@@ -16,12 +19,11 @@ a {
     height:20%;
 }
 section{
-    margin-left: 8%;
+    margin-left: 5em;
 }
 .form-control{
     width:15%;
 }
-
 
 /*html {
     font-size: 14px;

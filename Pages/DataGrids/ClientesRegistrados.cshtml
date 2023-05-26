@@ -1,19 +1,20 @@
 ﻿@page
-@model login4.Pages.DataGrids.ClientesBloqueadosModel
+@model login4.Pages.DataGrids.ClientesRegistradosModel
 @{
 }
+
 @(Html.DevExtreme().Lookup()
 
         .DataSource(ds => ds
         .Mvc()
-        .Controller("ClientesBloqueados")
+        .Controller("ClientesRegistrados")
         .LoadAction("GetTipo"))
         .ApplyValueMode(EditorApplyValueMode.Instantly)
         .ShowCancelButton(true)
         .ShowClearButton(true)
         .CancelButtonText("cancelar")
         .ClearButtonText("quitar filtro")
-     
+        .ApplyButtonText("aplicar filtro")
         .ValueExpr("IDTipo")
         .DisplayExpr("Nombre")
         .Value("todo")
@@ -27,14 +28,16 @@
             dataGrid.filter(["TipoID", "=", data.value]);
             }
         </text>
+    )
 
-    ))
+    )
 
-@(Html.DevExtreme().DataGrid<login4.Models.EF.ext_adm_CL_Search>()
+@(
+Html.DevExtreme().DataGrid<login4.Models.EF.ext_adm_CL_Search>()
     .DataSource(ds => ds.Mvc()
-        .Controller("ClientesBloqueados")
+        .Controller("ClientesRegistrados")
         .LoadAction("Get")
-     )
+    )
     .FilterRow(filterRow => filterRow
         .Visible(true)
         .ApplyFilter(GridApplyFilterMode.Auto)
@@ -46,12 +49,14 @@
      )
     .HeaderFilter(headerFilter => headerFilter.Visible(true))
     .ID("gridContainer")
+
     .Paging(paging => paging.PageSize(10))
     .Pager(pager =>
     {
         pager.ShowPageSizeSelector(true);
         pager.AllowedPageSizes(new[] { 5, 10, 20 });
         pager.ShowInfo(true);
+
     })
 
     .RemoteOperations(true)
@@ -63,7 +68,8 @@
     .Columns(columns =>
     {
 
-        columns.AddFor(m => m.IDPersona).AllowEditing(false);
+        columns.AddFor(m => m.IDPersona)
+        .AllowEditing(false);
 
         columns.AddFor(m => m.Nombre).AllowEditing(false);
 
@@ -77,19 +83,20 @@
 
         columns.AddFor(m => m.Email)
 
-             .AllowFiltering(false)
+              .AllowFiltering(false)
 
                 .Lookup(l => l
                     .DataSource("getEmail")
                     .DisplayExpr("Email")
                     .ValueExpr("IDContacto")
                     .AllowClearing(true)
+
                     )
 
                     .SetCellValue("setEmailValue")
                     .ShowEditorAlways(true)
                     .CalculateDisplayValue("Email");
-        @*columns.AddFor(m => m);*@
+
         columns.AddFor(m => m.PaginaWeb).AllowEditing(false);
 
         columns.AddFor(m => m.UsuarioRegistrado).AllowEditing(false);
@@ -107,23 +114,23 @@
       {
           btns.Add().Name(GridColumnButtonName.Edit);
           btns.Add().Name(GridColumnButtonName.Delete);
-          btns.Add()
-          .Name("Desregistrar")
-          .Hint("Desregistrar")
-          .Icon("clear")
+         @* btns.Add()
+          .Name("Registrar")
+          .Hint("Registrar")
+          .Icon("add")
           .OnClick("onClick");
           btns.Add()
-         .Name("Desbloquear")
-         .Hint("Desbloquear")
-         .Icon("unlock")
-         .OnClick("BloquearOnClick");
+         .Name("Bloquear")
+         .Hint("Bloquear")
+         .Icon("lock")
+         .OnClick("BloquearOnClick");*@
       });
     })
       .Editing(editing =>
       {
           editing.Mode(GridEditMode.Cell);
           editing.AllowUpdating(true);
-         
+          @*editing.AllowAdding(true);*@
       })
 )
 
@@ -138,7 +145,7 @@
         return {
             store: DevExpress.data.AspNet.createStore({
                 key: "IDContacto",
-                loadUrl: '@Url.Action("GetEmail", "ClientesBloqueados", new { httproute = true, IDPersona = "__IDPersona__"})'
+                loadUrl: '@Url.Action("GetEmail", "ClientesRegistrados", new { httproute = true, IDPersona = "__IDPersona__"})'
                     .replace("__IDPersona__", IDPersona),
                 loadParams: { IDPersona: IDPersona }
 
@@ -147,46 +154,47 @@
         };
     }
 
-    
 
-    function onClick(e) {
-        //var grid = e.component
-        //var selectedData = grid.getSelectedRowsData()[0]
-        //var email = selectedData.Email
-        var email = e.row.cells[6].text
-        var nombre = e.row.cells[1].text
-        var idpersona = e.row.cells[0].text
-        $.ajax({
-            type: "POST",
-            url: "@Url.Action("Desregistrar", "ClientesBloqueados")",
-            data: {
-                email: email
-            },
-            success: function (msg) {
-                window.alert(msg + " " + email);
-            },
-            error: function (req, status, error) {
-                window.alert(email + " error= " + error);
-            }
-        });
-    }
-    function BloquearOnClick(e) {
+    //function onClick(e) {
+    //    //var grid = e.component
+    //    //var selectedData = grid.getSelectedRowsData()[0]
+    //    //var email = selectedData.Email
+    //    var email = e.row.cells[6].text
+    //    var nombre = e.row.cells[1].text
+    //    var idpersona = e.row.cells[0].text
+    //    $.ajax({
+    //        type: "POST",
+    //        url: "@Url.Action("Registrar", "ClientesContactos")",
+    //        data: {
+    //            email: email,
+    //            nombre: nombre,
+    //            idpersona: idpersona
+    //        },
+    //        success: function (msg) {
+    //            window.alert(msg + " " + email);
+    //        },
+    //        error: function (req, status, error) {
+    //            window.alert(email + " error= " + error);
+    //        }
+    //    });
+    //}
+    //function BloquearOnClick(e) {
 
-        var email = e.row.cells[6].text
+    //    var email = e.row.cells[6].text
 
-        $.ajax({
-            type: "POST",
-            url: "@Url.Action("Bloquear", "ClientesContactos")",
-            data: {
-                email: email
-            },
-            success: function (msg) {
-                window.alert(msg);
-            },
-            error: function (req, status, error) {
-                window.alert(email + " error= " + error);
-            }
-        });
+    //    $.ajax({
+    //        type: "POST",
+    //        url: "@Url.Action("Bloquear", "ClientesContactos")",
+    //        data: {
+    //            email: email
+    //        },
+    //        success: function (msg) {
+    //            window.alert(msg);
+    //        },
+    //        error: function (req, status, error) {
+    //            window.alert(email + " error= " + error);
+    //        }
+    //    });
 
-    }
+    //}
 </script>

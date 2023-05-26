@@ -7,11 +7,12 @@
     <link rel="stylesheet" href="~/css/login.css" />
 </head>
 <div class="row">
+    <h2 class="titulo">Introduzca sus datos para entrar.</h2>
+    <hr />
     <div class="col-md-4">
         <section>
             <form id="account" method="post">
-                <h2>Use a local account to log in.</h2>
-                <hr />
+                
                 <div asp-validation-summary="ModelOnly" class="text-danger" ></div>
                 <div class="form-floating">
                     <label asp-for="Input.Email" class="form-label"><b>Email</b><br /></label>
