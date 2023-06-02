@@ -1,75 +1,41 @@
-﻿/*
-a {
-    color: #0077cc;
+﻿
+
+/*estilo cambioEmail*/
+
+.cambio-mail {
+    max-width: 400px;
+    margin: 0 auto;
+    text-align: center;
 }
 
-.form-control:focus {
-    border-color: #0077cc;
-    box-shadow: 0 0 0 0.2rem #0077cc;
-}*/
-.titulo {
-    color: #ff5722;
-    margin-left: 2em;
-}
-.btn-primary {
-    color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
-    width:10%;
-    height:20%;
-}
-section{
-    margin-left: 5em;
-}
-.form-control{
-    width:15%;
+    .cambio-mail h2 {
+        font-size: 24px;
+        color: #ff5722;
+    }
+
+.form-group {
+    margin-bottom: 20px;
 }
 
-/*html {
-    font-size: 14px;
-}
+    .form-group label {
+        display: block;
+        font-weight: bold;
+    }
 
-
-.container {
-    max-width: 960px;
-}
-
-.pricing-header {
-    max-width: 700px;
-}
-
-.border-top {
-    border-top: 1px solid #e5e5e5;
-}
-
-.border-bottom {
-    border-bottom: 1px solid #e5e5e5;
-}
-
-.box-shadow {
-    box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
-}
-
-button.accept-policy {
-    font-size: 1rem;
-    line-height: inherit;
-}
-
-html {
-    position: relative;
-    min-height: 100%;
-}
-
-body {
-    margin-bottom: 60px;
-}
-
-.footer {
-    position: absolute;
-    bottom: 0;
+.form-control {
     width: 100%;
-    overflow: scroll;
-    white-space: nowrap;
-    line-height: 60px;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
 }
-*/
+
+.btn-primary {
+    display: block;
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: none;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+}

@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Identity;
 using login4.Controllers;
 using login4.Services.EmailService;
 using login4.Models;
+using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +24,7 @@ builder.Services.AddScoped<UserManager<IdentityUser>>();
 builder.Services.AddScoped<ClientesContactosController>();
 builder.Services.AddScoped<IEmailService, Emailservice>();
 builder.Services
-    .AddRazorPages(/*options => options.Conventions.AuthorizePage("/Pages/About")*/)
+    .AddRazorPages()
     .AddJsonOptions(options => options.JsonSerializerOptions.PropertyNamingPolicy = null);
 
 var app = builder.Build();
@@ -33,13 +36,16 @@ if (!app.Environment.IsDevelopment())
 }
 app.UseStaticFiles();
 
+
 app.UseRouting();
-app.UseAuthentication();;
+app.UseAuthentication(); ;
 
 app.UseAuthorization();
 
 app.MapControllers();
 app.MapDefaultControllerRoute();
 app.MapRazorPages();
+
+
 
 app.Run();

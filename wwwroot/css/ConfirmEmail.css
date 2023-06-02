@@ -1,4 +1,4 @@
-﻿.row{
+﻿/*.row{
     margin: 5em;
 }
 .titulo {
@@ -16,4 +16,40 @@ border-color: #1861ac;
 width: 12.5em;
 height: 20%;
 margin-top:1em;
+}*/
+.cambio-mail {
+    max-width: 400px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+    .cambio-mail h2 {
+        font-size: 24px;
+        color: #ff5722;
+    }
+.form-group {
+    margin-bottom: 20px;
+}
+
+    .form-group label {
+        display: block;
+        font-weight: bold;
+    }
+
+.form-control {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.btn-primary {
+    display: block;
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: none;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
 }

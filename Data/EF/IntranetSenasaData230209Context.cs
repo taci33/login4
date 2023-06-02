@@ -1261,14 +1261,19 @@ public partial class IntranetSenasaData230209Context : IdentityDbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     { }
-//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-//        => optionsBuilder.UseSqlServer("Server=SVRSQL2014\\SQLPRUEBAS;Initial Catalog=Intranet_Senasa Data_230209;trustservercertificate=True;User Id=sa;Password=comisiones;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<IdentityUser>().ToTable("ClientesUsers");
+        // Personaliza la longitud de la columna Email
+        //modelBuilder.Entity<IdentityUser>(entity =>
+        //{
+            //entity.Property(u => u.Email).HasMaxLength(255);
+        //});
+    
+
+    modelBuilder.Entity<IdentityUser>().ToTable("ClientesUsers");
         modelBuilder.Entity<IdentityRole>().ToTable("clientesRole");
         modelBuilder.Entity<IdentityUserRole<string>>().ToTable("clientesUserRole");
         modelBuilder.Entity<IdentityUserClaim<string>>().ToTable("clientesUserClaim");
@@ -1295,6 +1300,8 @@ public partial class IntranetSenasaData230209Context : IdentityDbContext
             entity.Property(e => e.TipoDeCliente).HasColumnName("Tipo de Cliente");
             entity.Property(e => e.TipoID).HasColumnName("TipoID");
             entity.Property(e => e.LockoutEnabled).HasColumnName("LockoutEnabled");
+            entity.Property(e => e.EmailConfirmed).HasColumnName("EmailConfirmed");
+
         });
         modelBuilder.Entity<EXT_adm_CL_Tipos_lookup>(entity =>
         {

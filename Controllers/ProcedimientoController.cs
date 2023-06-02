@@ -49,8 +49,10 @@ namespace login4.Controllers
                 var clientIdParameter = new SqlParameter("@IDTipo", SqlDbType.Int);
                 clientIdParameter.Value = DBNull.Value;
                 var clientIdParameter2 = new SqlParameter("@LockoutEnabled", false);
+                var clientIdParameter3 = new SqlParameter("@UsuarioRegistrado", false);
+                var clientIdParameter4 = new SqlParameter("@EmailConfirmed", false);
                 var clientes = _context.ext_adm_CL_Searchs
-                .FromSqlRaw("exec ext_adm_CL_Search @IDTipo,@LockoutEnabled", clientIdParameter, clientIdParameter2)
+                .FromSqlRaw("exec ext_adm_CL_Search @IDTipo,@LockoutEnabled,@UsuarioRegistrado,@EmailConfirmed", clientIdParameter, clientIdParameter2, clientIdParameter3, clientIdParameter4)
                 .AsEnumerable().Select(i => new
                 {
                     i.IDPersona,
@@ -64,8 +66,10 @@ namespace login4.Controllers
                     i.UsuarioRegistrado,
                     i.TipoDeCliente,
                     i.TipoID,
-                    i.LockoutEnabled
-                   
+                    i.LockoutEnabled,
+                    //i.EmailConfirmed
+
+
                 })
                 .ToList();
 

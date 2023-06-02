@@ -1,8 +1,11 @@
 ﻿@page
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
 @model login4.Pages.DataGrids.ClientesPAModel
-@{}
+@{
    
-
+}
 
     @(Html.DevExtreme().Lookup()
         
@@ -29,29 +32,21 @@
             dataGrid.filter(["TipoID", "=", data.value]);
             }</text>
         
-    )
-        
-       @* .OnValueChanged(@<text>
-            function(data) {
-                var dataGrid = $("#gridContainer").dxDataGrid("instance");
-                if (data.value == "All")
-                    dataGrid.clearFilter();
-                else
-                    dataGrid.filter(["Task_Status", "=", data.value]);
-            }
-        </text>)*@
-    )
+    ))
 
 @(
 Html.DevExtreme().DataGrid<login4.Models.EF.ext_adm_CL_Search>()
     .DataSource(ds => ds.Mvc()
         .Controller("Procedimiento")
         .LoadAction("Get")
+        
     )
+    
     .FilterRow(filterRow => filterRow
         .Visible(true)
         .ApplyFilter(GridApplyFilterMode.Auto)
     )
+        
       .SearchPanel(searchPanel => searchPanel
         .Visible(true)
         .Width(240)
@@ -68,7 +63,9 @@ Html.DevExtreme().DataGrid<login4.Models.EF.ext_adm_CL_Search>()
         pager.ShowInfo(true);
 
     })
-
+    
+    .RepaintChangesOnly(true)
+    .OnEditorPreparing("onEditorPreparing")
     .RemoteOperations(true)
     .Sorting(sorting => sorting.Mode(GridSortingMode.Multiple))
     .Grouping(g => g.AutoExpandAll(false))
@@ -77,10 +74,10 @@ Html.DevExtreme().DataGrid<login4.Models.EF.ext_adm_CL_Search>()
     .FilterRow(f => f.Visible(true))
     .Columns(columns =>
     { 
-
+       
         columns.AddFor(m => m.IDPersona)
         .AllowEditing(false);
-
+    
         columns.AddFor(m => m.Nombre).AllowEditing(false);
 
         columns.AddFor(m => m.NombreComercial).AllowEditing(false);
@@ -92,31 +89,30 @@ Html.DevExtreme().DataGrid<login4.Models.EF.ext_adm_CL_Search>()
         columns.AddFor(m => m.CIF_NIF).AllowEditing(false);
 
         columns.AddFor(m => m.Email)
-      
-              .AllowFiltering(false)
-                
+             
+                .AllowFiltering(false)
+               
                 .Lookup(l => l
                     .DataSource("getEmail")
                     .DisplayExpr("Email")
-                    .ValueExpr("IDContacto")
-                    .AllowClearing(true)
-                    
                     )
                     
-                    .SetCellValue("setEmailValue")
                     .ShowEditorAlways(true)
                     .CalculateDisplayValue("Email");
+                     @*.SetCellValue("setEmailValue");*@
    
         columns.AddFor(m => m.PaginaWeb).AllowEditing(false);
 
-        columns.AddFor(m => m.UsuarioRegistrado).AllowEditing(false);
+        columns.AddFor(m => m.UsuarioRegistrado)
+        .Visible(false)
+        .AllowEditing(false);
 
         columns.AddFor(m => m.TipoDeCliente).AllowEditing(false);
 
         columns.AddFor(m => m.TipoID).AllowEditing(false);
 
-        columns.AddFor(m => m.LockoutEnabled);
-
+        columns.AddFor(m => m.LockoutEnabled)
+        .Visible(false);
         columns.Add()
       .Type(GridCommandColumnType.Buttons)
       .Width(110)
@@ -129,11 +125,7 @@ Html.DevExtreme().DataGrid<login4.Models.EF.ext_adm_CL_Search>()
           .Hint("Registrar")
           .Icon("add")
           .OnClick("onClick");
-          btns.Add()
-         .Name("Bloquear")
-         .Hint("Bloquear")
-         .Icon("lock")
-         .OnClick("BloquearOnClick");
+          
       });
     })
       .Editing(editing =>
@@ -145,10 +137,23 @@ Html.DevExtreme().DataGrid<login4.Models.EF.ext_adm_CL_Search>()
 )
 
 <script>
+   
+    //function setEmailValue(rowData, value) {
+    //    rowData.Email = value; // Asignar el valor seleccionado a la columna "Email"
+    //}
 
-    function setEmailValue(rowData, value) {
-        rowData.Email = value;
+    function onEditorPreparing(e) {
+        if (e.parentType === "dataRow" && e.dataField === "Email") {
+            e.editorOptions.onValueChanged = function (args) {
+                var grid = $("#gridContainer").dxDataGrid("instance");
+                var rowIndex = e.row.rowIndex;
+                grid.cellValue(rowIndex, "Email", args.value.Email);
+            };
+        }
     }
+   
+
+
 
     function getEmail(options) {
         var IDPersona = options.data.IDPersona;
@@ -164,22 +169,10 @@ Html.DevExtreme().DataGrid<login4.Models.EF.ext_adm_CL_Search>()
         }; 
         }
     
-        //filter: options.data ? ["IDPersona", "=", options.data.IDPersona] : null
-        //console.log(options);
-        //if (!options.data) return null;
-        //var store = {
-        //    store: DevExpress.data.AspNet.createStore({
-        //        key: "IDPersona",
-        //        loadUrl: '/Controllers/Procedimiento/GetEmail?IDPersona=' + options.data.IDPersona
-        //    })
-        //};
-        //console.log(store);
-        //return store;
-  
+     
+
     function onClick(e) {
-        //var grid = e.component
-        //var selectedData = grid.getSelectedRowsData()[0]
-        //var email = selectedData.Email
+    
         var email = e.row.cells[6].text
         var nombre = e.row.cells[1].text
         var idpersona = e.row.cells[0].text
@@ -199,23 +192,5 @@ Html.DevExtreme().DataGrid<login4.Models.EF.ext_adm_CL_Search>()
             }
         });
     }
-    function BloquearOnClick(e) {
-      
-        var email = e.row.cells[6].text
- 
-        $.ajax({
-            type: "POST",
-            url: "@Url.Action("Bloquear", "ClientesContactos")",
-            data: {
-                email: email
-            },
-            success: function (msg) {
-                window.alert(msg);
-            },
-            error: function (req, status, error) {
-                window.alert(email + " error= " + error);
-            }
-        });
-
-    }
+   
 </script>

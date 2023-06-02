@@ -12,8 +12,9 @@ namespace login4.Controllers
     [Route("api/[controller]/[action]")]
     public class ClientesRegistradosController : Controller
     {
+
         private IntranetSenasaData230209Context _context;
-        public ClientesRegistradosController(IntranetSenasaData230209Context context, IHttpContextAccessor httpContextAccessor, IMemoryCache memoryCache)
+        public ClientesRegistradosController(IntranetSenasaData230209Context context)
         {
             _context = context;
         }
@@ -25,8 +26,10 @@ namespace login4.Controllers
                 var clientIdParameter = new SqlParameter("@IDTipo", SqlDbType.Int);
                 clientIdParameter.Value = DBNull.Value;
                 var clientIdParameter2 = new SqlParameter("@LockoutEnabled", false);
+                var clientIdParameter3 = new SqlParameter("@UsuarioRegistrado", true);
+                var clientIdParameter4 = new SqlParameter("@EmailConfirmed", true);
                 var clientes = _context.ext_adm_CL_Searchs
-                .FromSqlRaw("exec ext_adm_CL_Search @IDTipo,@LockoutEnabled", clientIdParameter, clientIdParameter2)
+                .FromSqlRaw("exec ext_adm_CL_Search @IDTipo,@LockoutEnabled,@UsuarioRegistrado,@EmailConfirmed", clientIdParameter, clientIdParameter2, clientIdParameter3, clientIdParameter4)
                 .AsEnumerable().Select(i => new
                 {
                     i.IDPersona,
@@ -45,9 +48,6 @@ namespace login4.Controllers
                 })
                 .ToList();
 
-
-                //var clientes = _context.ext_adm_CL_Searchs.Select(i => new { i.IDPersona, i.Nombre });
-
                 return Json(DataSourceLoader.Load(clientes, loadOptions));
             }
         }
@@ -57,9 +57,6 @@ namespace login4.Controllers
         public object GetTipo(DataSourceLoadOptions loadOptions)
         {
 
-            //var clientIdParameter = new SqlParameter("@IDTipo", SqlDbType.Int);
-            //clientIdParameter.Value = DBNull.Value;
-            //var clientIdParameter2 = new SqlParameter("@LockoutEnabled", false);
             var clientes = _context.EXT_adm_CL_Tipos_lookups
             .FromSqlRaw("exec EXT_adm_CL_Tipos_lookup")
             .AsEnumerable().Select(i => new
@@ -67,9 +64,7 @@ namespace login4.Controllers
                 i.IDTipo,
                 i.Nombre
             })
-            .ToList();                //.ToListAsync();
-
-            //var clientes = _context.ext_adm_CL_Searchs.Select(i => new { i.IDPersona, i.Nombre });
+            .ToList();               
 
             return Json(DataSourceLoader.Load(clientes, loadOptions));
         }
@@ -91,9 +86,7 @@ namespace login4.Controllers
                         i.Email,
                         i.Descripcion
                     })
-                    .ToList();                //.ToListAsync();
-
-                //var clientes = _context.ext_adm_CL_Searchs.Select(i => new { i.IDPersona, i.Nombre });
+                    .ToList();               
 
                 return Json(DataSourceLoader.Load(clientes, loadOptions));
 
@@ -102,9 +95,6 @@ namespace login4.Controllers
             {
                 ModelState.AddModelError("", ex.Message);
 
-
-
-                // Devuelve una respuesta con el mensaje de error al cliente
                 return View();
             }
         }

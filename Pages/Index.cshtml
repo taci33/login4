@@ -1,28 +1,87 @@
-
 @page
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenido</title>
+    <link rel="stylesheet" href="~/css/Index.css" />
+</head>
+@if(User.IsInRole("Administrador")){
+    <body>
+        <h1>Bienvenido</h1>
+        <div class="contenedor">
+            <div class="review-card">
+                <p>Clientes</p>
+                <p>Da de alta a nuevos clientes en la intranet y accede a su información detallada. Mantén un registro completo y actualizado de tus clientes y sus actividades.</p>
+                <a href="/DataGrids/ClientesPA">Pulse aquí</a>
+            </div>
+            <div class="review-card">
+                <p>Clientes registrados</p>
+                <p>Explora la lista de clientes que ya están registrados en la intranet. Puedes ver su información y bloquearlos si es necesario.</p>
+                <a href="/DataGrids/ClientesRegistrados">Pulse aquí</a>
+            </div>
+            <div class="review-card">
+                <p>Clientes pendientes</p>
+                <p>Controla y gestiona a los clientes que aún no han confirmado su correo electrónico. Verifica si han interactuado con el correo de confirmación.</p>
+                <a href="/DataGrids/ClientesPendientes">Pulse aquí</a>
+            </div>
+            <div class="review-card">
+                <p>Clientes bloqueados</p>
+                <p>Visualiza y administra a los clientes que han sido bloqueados en la intranet. Puedes desbloquearlos o eliminarlos definitivamente según sea necesario.</p>
+                <a href="/DataGrids/ClientesBloqueados">Pulse aquí</a>
+            </div>
+        </div>
+    </body>
 
+}
+@if(User.IsInRole("Cliente")){
 
-@*<span id="spanMsg"></span>
-
-
-<script type="text/javascript">
-    $(document).ready(function() {
-        val1 = 5;
-        val2 = 2;
-        $.ajax({
-            type: "POST",
-            url: "@Url.Action("Add", "ClientesContactos")",
-            data: { number1: val1, number2: val2 },
-            dataType: "text",
-            success: function (msg){
-                document.getElementById("spanMsg").textContent = "Sum= " + msg;
-            },
-            error: function (req, status, error){
-                document.getElementById("spanMsg").textContent = "Sum= " + error;
-            }
-
-        })
-    }
+ 
     
-);
-</script*@
+
+    <body>
+        <h1>Bienvenido</h1>
+        <div class="contenedor">
+        <div class="review-card">
+            <p>Clientes</p>
+            <p>Da de alta a nuevos clientes en la intranet y accede a su información detallada. Mantén un registro completo y actualizado de tus clientes y sus actividades.</p>
+            <a href="/DataGrids/ClientesPA">Pulse aquí</a>
+        </div>
+        <div class="review-card">
+            <p>Clientes registrados</p>
+            <p>Explora la lista de clientes que ya están registrados en la intranet. Puedes ver su información y bloquearlos si es necesario.</p>
+            <a href="/DataGrids/ClientesRegistrados">Pulse aquí</a>
+        </div>
+        <div class="review-card">
+            <p>Clientes pendientes</p>
+            <p>Controla y gestiona a los clientes que aún no han confirmado su correo electrónico. Verifica si han interactuado con el correo de confirmación.</p>
+            <a href="/DataGrids/ClientesPendientes">Pulse aquí</a>
+        </div>
+        <div class="review-card">
+            <p>Clientes bloqueados</p>
+            <p>Visualiza y administra a los clientes que han sido bloqueados en la intranet. Puedes desbloquearlos o eliminarlos definitivamente según sea necesario.</p>
+            <a href="/DataGrids/ClientesBloqueados">Pulse aquí</a>
+        </div>
+        </div>
+    </body>
+
+}
+
+@if (!SignInManager.IsSignedIn(User)){
+
+}
+@if(User.IsInRole("Usuario")){
+
+<body>
+    <h1>Bienvenido</h1>
+    <div class="contenedor">
+        <div class="review-card">
+            <p>Facturas</p>
+                <p>Accede a la lista de facturas y gestiona la información relacionada. Podrás ver detalles de cada factura, generar informes y realizar acciones específicas según sea necesario.</p>
+            <a href="/DataGrids/ClientesPA">Pulse aquí</a>
+        </div>
+    </div>
+    </body>
+}

@@ -27,6 +27,8 @@ using login4.Services.EmailService;
 using login4.Models;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using System.Text.Encodings.Web;
+using MimeKit;
+using System.Resources;
 
 namespace login4.Controllers
 {
@@ -41,19 +43,23 @@ namespace login4.Controllers
         private readonly IUserStore<IdentityUser> _userStore;
         private readonly IUserEmailStore<IdentityUser> _emailStore;
         private readonly IEmailService _emailService;
+        private readonly IWebHostEnvironment _env;
         public object JsonRequestBehavior { get; private set; }
 
         public ClientesContactosController(
             UserManager<IdentityUser> userManager,
               IUserStore<IdentityUser> userStore,
             IntranetSenasaData230209Context context, 
-            IEmailService emailService)
+            IEmailService emailService,
+            IWebHostEnvironment env)
+           
         {
             _emailService = emailService;
             _userManager = userManager;
             _context = context;
             _userStore = userStore;
             _emailStore = GetEmailStore();
+            _env = env;
         }
 
 
@@ -231,6 +237,9 @@ namespace login4.Controllers
                 }
         
         }
+
+        
+
         [HttpPost]
         public async Task<IActionResult> Registrar(string email, string nombre, string idpersona)
         {
@@ -248,7 +257,7 @@ namespace login4.Controllers
                     {
                         Nombre = nombre,
                         IDpersona = idpersona,
-                        RolAcceso = "usuario"
+                        RolAcceso = "Usuario"
                     };
                     await _userStore.SetUserNameAsync(user, email, CancellationToken.None);
                     await _emailStore.SetEmailAsync(user, email, CancellationToken.None);
@@ -258,39 +267,44 @@ namespace login4.Controllers
                     {
                         var userId = await _userManager.GetUserIdAsync(user);
                         var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                        await _userManager.AddToRoleAsync(user, "Usuario");
                         //var confirmacion = await _userManager.ConfirmEmailAsync(user, code);//confirmo temporalmente el email tal cual se registran
                         var lockDisabledTask = _userManager.SetLockoutEnabledAsync(user, false);
                         lockDisabledTask.Wait();
                         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                        // Enviar la contraseña por correo electrónico
+                        // Enviar la confirmacion por correo electrónico
 
-                        //var confirmationLink = Url.Action(nameof(ConfirmEmail()), "Pages", new { code, email = user.Email }, Request.Scheme);
-                        //var message = new Message(new string[] { user.Email }, "Confirmation email link", confirmationLink, null);
-                        //await _emailSender.SendEmailAsync(message);
-
-                        //var callbackUrl = Url.Page(
-                        //"/GestionUsuarios/ConfirmarEmail",
-                        //pageHandler: null,
-                        //values: new { area = "Pages", userId = userId, code = code, returnUrl = returnUrl },
-                        //protocol: Request.Scheme);
                         var callbackUrl = Url.Page(
                       "/Account/ConfirmEmail",
                       pageHandler: null,
                       values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
                       protocol: Request.Scheme);
 
+                        var rootPath = _env.WebRootPath; //obtiene la ruta a la carpeta wwwroot
+                        var templatename = "mt_registro.html";
+                        var templateUrl = rootPath + "\\mail_templates\\" + templatename;
 
+                        var name = ((appusuario)user).Nombre;
+                        var link = HtmlEncoder.Default.Encode(callbackUrl);
+                        
+                        var builder = new BodyBuilder();
+                        //using(StreamReader SourceReader = System.IO.File.OpenText("C:\\Users\\Practicas\\source\\repos\\taci33\\login4\\wwwroot\\mail_templates\\mt_registro.html"))
+                        using (StreamReader SourceReader = System.IO.File.OpenText(templateUrl))
+                        {
 
-
-                        var cuerpo = "su correo " + email + " ha sido registrado. Introduzca su nueva contraseña a traves del siguiente link:" +
-                            $" <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>Pulse aquí</a>.";
-
-                        //var cuerpo = "su correo " + email + " ha sido registrado en la intranet con contraseña: " + password + "  " + confirmationLink;
+                            builder.HtmlBody = SourceReader.ReadToEnd();
+                        }
+                        
+                        builder.HtmlBody = builder.HtmlBody.Replace("{{link}}", link);
+                        builder.HtmlBody = builder.HtmlBody.Replace("{{nombre}}", name);
+                        builder.HtmlBody = builder.HtmlBody.Replace("{{email}}", email);
+                        var replybody = builder.HtmlBody;  
+                       
                         var mail = new EmailDto
                         {
                             To = /*email*/"aalbertosanzcarmen@gmail.com",
                             Subject = "prueba",
-                            Body = cuerpo
+                            Body = replybody
                         };
                         
                         _emailService.SendEmail(mail);

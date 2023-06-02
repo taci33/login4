@@ -1,0 +1,30 @@
+﻿@page
+@model login4.Pages.CambioEmailModel
+
+<head>
+    <link rel="stylesheet" href="~/css/login.css" />
+</head>
+
+<div class="cambio-mail">
+    <h2>Actualizar Configuración de Email</h2>
+
+    <form method="post" asp-page-handler="ActualizarConfiguracion">
+        <div class="form-group">
+            <label>Email Host:</label>
+            <input type="text" class="form-control" asp-for="EmailHost" />
+        </div>
+        <div class="form-group">
+            <label>Email Usuario:</label>
+            <input type="text" class="form-control" asp-for="EmailUserName" />
+        </div>
+        <div class="form-group">
+            <label>Contraseña Email:</label>
+            <input type="password" class="form-control" asp-for="EmailPassword"/>
+        </div>
+        <div class="form-group">
+            <label>Puerto:</label>
+            <input type="number" class="form-control" asp-for="Port" />
+        </div>
+        <button type="submit" class="btn btn-primary">Guardar Configuración</button>
+    </form>
+</div>
