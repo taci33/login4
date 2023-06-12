@@ -1,8 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-#nullable disable
-
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
@@ -40,6 +36,8 @@ namespace login4.Areas.Identity.Pages.Account
             [EmailAddress]
             public string Email { get; set; }
 
+            public string Token { get; set; }
+
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
@@ -73,12 +71,16 @@ namespace login4.Areas.Identity.Pages.Account
         [TempData]
         public string StatusMessage { get; set; }
         public string mail;
+
+        //a traves del link de confirmacion recibe la id de usuario y el token de confirmacionde email
         public async Task<IActionResult> OnGetAsync(string userId, string code)
         {
+            try { 
             var user = await _userManager.FindByIdAsync(userId);
-            ViewData["mail"] = user.Email;
+           
             if (userId == null || code == null)
-            {
+            { 
+                
                 return RedirectToPage("/Index");
             }
 
@@ -88,41 +90,46 @@ namespace login4.Areas.Identity.Pages.Account
             {
                 return NotFound($"Unable to load user with ID '{userId}'.");
             }
-
-            //code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
-            //var result = await _userManager.ConfirmEmailAsync(user, code);
-            //StatusMessage = result.Succeeded ? "Thank you for confirming your email." : "Error confirming your email.";
-            return Page();
-        }
+            ViewData["mail"] = user.Email;
+            ViewData["code"] = code;
+                return Page();
+            }catch (Exception ex)
+            {
+                return RedirectToPage("/Error");
+            }
+            
+            }
         
+        //al validar el formulario de cambio de contraseña, elimina la pass automatica para introducir la nueva passs 
+        //entonces es cuando confirma el email
         public async Task<IActionResult> OnPostAsync()
         {
-            //if (!ModelState.IsValid)
-            //{
-            //    return Page();
-            //}
-            
+            try { 
             var user = await _userManager.FindByEmailAsync(Input.Email);
-            var result = await _userManager.RemovePasswordAsync(user);
+            var token = Input.Token;
             if (user == null)
             {
                 // Don't reveal that the user does not exist
                 return RedirectToPage("/GestionUsuarios/RegisterEx");
             }
+            
+            
+                
+                //var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                var confirmacion = await _userManager.ConfirmEmailAsync(user, token);
+                var result = await _userManager.RemovePasswordAsync(user);
 
-            var resultado = await _userManager.AddPasswordAsync(user, Input.Password);
-            if (resultado.Succeeded)
-            {
-                var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                var confirmacion = await _userManager.ConfirmEmailAsync(user, code);
+                var resultado = await _userManager.AddPasswordAsync(user, Input.Password);
                 return RedirectToPage("/GestionUsuarios/LoginEx");
+            
             }
+            catch (Exception ex) { 
 
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError(string.Empty, error.Description);
-            }
-            return Page();
-        }
+            return RedirectToPage("/Error");
+        }}
     }
 }
+
+
+
+

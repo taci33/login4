@@ -43,7 +43,8 @@ namespace login4.Controllers
                     i.UsuarioRegistrado,
                     i.TipoDeCliente,
                     i.TipoID,
-                    i.LockoutEnabled
+                    i.LockoutEnabled,
+                    i.EXT_Email
 
                 })
                 .ToList();

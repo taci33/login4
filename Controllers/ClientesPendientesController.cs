@@ -2,7 +2,7 @@
 using DevExtreme.AspNet.Mvc;
 using login4.Models;
 using login4.Models.EF;
-using login4.Pages;
+using login4.Pages.GestionUsuarios;
 using login4.Services.EmailService;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -33,6 +33,8 @@ namespace login4.Controllers
             _env = env;
         }
 
+        //el metodo get carga los datos del procedimiento almacenado
+
         [HttpGet]
         public IActionResult Get(DataSourceLoadOptions loadOptions)
         {
@@ -58,26 +60,24 @@ namespace login4.Controllers
                     i.TipoDeCliente,
                     i.TipoID,
                     i.LockoutEnabled,
-                    i.EmailConfirmed
+                    i.EmailConfirmed,
+                    i.EXT_Email
+                    
 
                 })
                 .ToList();
 
 
-                //var clientes = _context.ext_adm_CL_Searchs.Select(i => new { i.IDPersona, i.Nombre });
-
                 return Json(DataSourceLoader.Load(clientes, loadOptions));
             }
         }
 
-
+        //metodo que proporciona los datos al lookup de filtrado por IDTipo
         [HttpGet]
         public object GetTipo(DataSourceLoadOptions loadOptions)
         {
 
-            //var clientIdParameter = new SqlParameter("@IDTipo", SqlDbType.Int);
-            //clientIdParameter.Value = DBNull.Value;
-            //var clientIdParameter2 = new SqlParameter("@LockoutEnabled", false);
+           
             var clientes = _context.EXT_adm_CL_Tipos_lookups
             .FromSqlRaw("exec EXT_adm_CL_Tipos_lookup")
             .AsEnumerable().Select(i => new
@@ -85,13 +85,13 @@ namespace login4.Controllers
                 i.IDTipo,
                 i.Nombre
             })
-            .ToList();                //.ToListAsync();
-
-            //var clientes = _context.ext_adm_CL_Searchs.Select(i => new { i.IDPersona, i.Nombre });
+            .ToList();               
 
             return Json(DataSourceLoader.Load(clientes, loadOptions));
         }
 
+
+        //este metodo le proporciona la lista de emails asociados a cada cliente para seleccionar el email con el que sera registrado en la extranet
         [HttpGet]
         public object GetEmail(int IDPersona, DataSourceLoadOptions loadOptions)
         {
@@ -109,9 +109,7 @@ namespace login4.Controllers
                         i.Email,
                         i.Descripcion
                     })
-                    .ToList();                //.ToListAsync();
-
-                //var clientes = _context.ext_adm_CL_Searchs.Select(i => new { i.IDPersona, i.Nombre });
+                    .ToList();                
 
                 return Json(DataSourceLoader.Load(clientes, loadOptions));
 
@@ -140,55 +138,45 @@ namespace login4.Controllers
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 //var confirmacion = await _userManager.ConfirmEmailAsync(user, code);//confirmo temporalmente el email tal cual se registran
                 code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                // Enviar la contraseña por correo electrónico
-
-                //var confirmationLink = Url.Action(nameof(ConfirmEmail()), "Pages", new { code, email = user.Email }, Request.Scheme);
-                //var message = new Message(new string[] { user.Email }, "Confirmation email link", confirmationLink, null);
-                //await _emailSender.SendEmailAsync(message);
-
-                //var callbackUrl = Url.Page(
-                //"/GestionUsuarios/ConfirmarEmail",
-                //pageHandler: null,
-                //values: new { area = "Pages", userId = userId, code = code, returnUrl = returnUrl },
-                //protocol: Request.Scheme);
+                
                 var callbackUrl = Url.Page(
               "/Account/ConfirmEmail",
               pageHandler: null,
               values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
               protocol: Request.Scheme);
 
-                var rootPath = _env.WebRootPath;
+               
                 var templatename = "mt_registro.html";
-                var templateUrl = rootPath + "\\mail_templates\\" + templatename;
+                var urlPlantilla = new UrlPlantilla(_env);
+                var templateUrl = urlPlantilla.UrlTemplate(templatename); // creo la url completa de la platilla
+
 
                 var name = ((appusuario)user).Nombre;
-                var link = HtmlEncoder.Default.Encode(callbackUrl);
-                //var webRoot = _env.WebRootPath;
+                var link = HtmlEncoder.Default.Encode(callbackUrl); //creo el link de confirmacion
+            
                 var builder = new BodyBuilder();
-                //using(StreamReader SourceReader = System.IO.File.OpenText("C:\\Users\\Practicas\\source\\repos\\taci33\\login4\\wwwroot\\mail_templates\\mt_registro.html"))
+          
                 using (StreamReader SourceReader = System.IO.File.OpenText(templateUrl))
                 {
 
-                    builder.HtmlBody = SourceReader.ReadToEnd();
+                    builder.HtmlBody = SourceReader.ReadToEnd();//leo la plantilla completa
                 }
-
+                //reemplazamos los campos en la plantilla
                 builder.HtmlBody = builder.HtmlBody.Replace("{{link}}", link);
                 builder.HtmlBody = builder.HtmlBody.Replace("{{nombre}}", name);
                 builder.HtmlBody = builder.HtmlBody.Replace("{{email}}", email);
                 var replybody = builder.HtmlBody;
-                //var cuerpo = "su correo " + email + " ha sido registrado. Introduzca su nueva contraseña a traves del siguiente link:" +
-                //    $" <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>Pulse aquí</a>.";
-
-                //var cuerpo = "su correo " + email + " ha sido registrado en la intranet con contraseña: " + password + "  " + confirmationLink;
+               
+                //creamos el objeto con el contenido del email
                 var mail = new EmailDto
                 {
                     To = /*email*/"aalbertosanzcarmen@gmail.com",
-                    Subject = "prueba",
+                    Subject = "Registro",
                     Body = replybody
                 };
 
                 _emailService.SendEmail(mail);
-                //return RedirectToAction(nameof(SuccessRegistration));
+                
                 return Ok("Email reenviado correctamente.");
             }
             else
@@ -198,8 +186,45 @@ namespace login4.Controllers
 
         }
 
-         
-        
+        [HttpPost]
+        public async Task<IActionResult> Desregistrar(string email)
+        {
+            // Buscar el usuario por el email
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                // Manejar el escenario donde el usuario no se encuentra
+                return NotFound();
+            }
+
+            try
+            {
+                // Eliminar los datos del usuario en las tablas de Identity
+                var result = await _userManager.DeleteAsync(user);
+                if (!result.Succeeded)
+                {
+                    // Manejar el escenario donde ocurre un error durante la eliminación
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
+                    return BadRequest(ModelState);
+                }
+
+                // Realizar otras operaciones para eliminar los datos relacionados al usuario en otras tablas
+
+                // Manejar el escenario de éxito
+                return Ok("Datos de usuario eliminados correctamente");
+            }
+            catch (Exception ex)
+            {
+                // Manejar la excepción adecuadamente
+                ModelState.AddModelError("", ex.Message);
+                // Devolver una respuesta con el mensaje de error al cliente
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
 
 
 

@@ -12,16 +12,18 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("Intranet_Senasa Data_230209Connection");
+Double duracion = double.Parse(builder.Configuration.GetSection("Token")["Duration"]);
 builder.Services.AddDbContext<IntranetSenasaData230209Context>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-
+builder.Services.Configure<DataProtectionTokenProviderOptions>(o =>
+       o.TokenLifespan = TimeSpan.FromHours(duracion));
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddEntityFrameworkStores<IntranetSenasaData230209Context>()
     .AddDefaultTokenProviders();
 builder.Services.AddScoped<UserManager<IdentityUser>>();
-builder.Services.AddScoped<ClientesContactosController>();
+//builder.Services.AddScoped<ClientesContactosController>();
 builder.Services.AddScoped<IEmailService, Emailservice>();
 builder.Services
     .AddRazorPages()

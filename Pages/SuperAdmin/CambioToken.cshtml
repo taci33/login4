@@ -1,0 +1,25 @@
+﻿@page
+@model login4.Pages.SuperAdmin.CambioTokenModel
+@{
+}
+
+
+@*a traves de este formulario se cambia la duración del token*@
+
+<head>
+    <link rel="stylesheet" href="~/css/login.css" />
+</head>
+
+<div class="cambio-mail">
+    <h2>Actualizar duración token confirmación email</h2>
+
+    <form method="post" asp-page-handler="ActualizarConfiguracion">
+        <div class="form-group">
+            <label>Duración token (en horas):</label>
+            <input type="number" class="form-control" asp-for="Duration" />
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Guardar Configuración</button>
+    </form>
+
+</div>

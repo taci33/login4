@@ -7,9 +7,9 @@
     <link rel="stylesheet" href="~/css/ConfirmEmail.css" />
 </head>
 
-
-
-@*<partial name="_StatusMessage" model="Model.StatusMessage" />*@
+@*para poder registrar usuarios desde una tabla se les asigna una pass automatica
+    entonces al confirmar el email estan obligados a cambiar la pass
+*@
 
 <div class="cambio-mail">
     <h2 class="titulo">@ViewData["Title"]</h2>
@@ -18,12 +18,12 @@
         <section>
         <form method="post" >
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            @*<input asp-for="Input.Email" type="hidden" />*@
+            
             <div class="form-group">
-                <input asp-for="Input.Email" type="hidden" value="@ViewData["mail"]"/>
+                    <input asp-for="Input.Token" type="hidden" value="@ViewData["code"]" />
+                    <input asp-for="Input.Email" type="hidden" value="@ViewData["mail"]" />@*al estar oculto el imput de email solo puedes cambiar la pass*@
                 <p><b>Email: @ViewData["mail"]</b></p>
-               @* <label asp-for="Input.Email" class="form-label"></label>
-                <span asp-validation-for="Input.Email" class="text-danger"></span>*@
+             
             </div>
                 <div class="form-group">
                 <label asp-for="Input.Password" class="form-label"><b>Contraseña</b></label>

@@ -13,7 +13,8 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using static NuGet.Packaging.PackagingConstants;
 using login4.Services.EmailService;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-
+using System.Net;
+using login4.Pages.GestionUsuarios;
 
 namespace login4.Controllers
 {
@@ -30,10 +31,7 @@ namespace login4.Controllers
            _context = context;
         }
 
-        //public ClientesBloqueadosController(, IHttpContextAccessor httpContextAccessor, IMemoryCache memoryCache)
-        //{
-            
-        //}
+        
 
         [HttpGet]
         public IActionResult Get(DataSourceLoadOptions loadOptions)
@@ -59,7 +57,8 @@ namespace login4.Controllers
                     i.UsuarioRegistrado,
                     i.TipoDeCliente,
                     i.TipoID,
-                    i.LockoutEnabled
+                    i.LockoutEnabled,
+                    i.EXT_Email
 
                 })
                 .ToList();
@@ -74,9 +73,6 @@ namespace login4.Controllers
         public object GetTipo(DataSourceLoadOptions loadOptions)
         {
 
-            //var clientIdParameter = new SqlParameter("@IDTipo", SqlDbType.Int);
-            //clientIdParameter.Value = DBNull.Value;
-            //var clientIdParameter2 = new SqlParameter("@LockoutEnabled", false);
             var clientes = _context.EXT_adm_CL_Tipos_lookups
             .FromSqlRaw("exec EXT_adm_CL_Tipos_lookup")
             .AsEnumerable().Select(i => new
@@ -84,9 +80,7 @@ namespace login4.Controllers
                 i.IDTipo,
                 i.Nombre
             })
-            .ToList();                //.ToListAsync();
-
-            //var clientes = _context.ext_adm_CL_Searchs.Select(i => new { i.IDPersona, i.Nombre });
+            .ToList();               
 
             return Json(DataSourceLoader.Load(clientes, loadOptions));
         }
@@ -94,7 +88,7 @@ namespace login4.Controllers
         [HttpGet]
         public object GetEmail(int IDPersona, DataSourceLoadOptions loadOptions)
         {
-
+            //consulta la lista de emails de cada IDPersona
             try
             {
                 var IDpersona = new SqlParameter("@IDPersona", SqlDbType.Int);
@@ -108,9 +102,7 @@ namespace login4.Controllers
                         i.Email,
                         i.Descripcion
                     })
-                    .ToList();                //.ToListAsync();
-
-                //var clientes = _context.ext_adm_CL_Searchs.Select(i => new { i.IDPersona, i.Nombre });
+                    .ToList();                
 
                 return Json(DataSourceLoader.Load(clientes, loadOptions));
 
@@ -165,20 +157,38 @@ namespace login4.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
+        [HttpPost]
+        public async Task<IActionResult> Bloquear(string email)
+        {
+            //para poder bloquear usuarios temporalmente recurrimos al lockoutenabled, con esta funcion podemos bloquear a los usuarios durante un tiempo concreto
+            //en este caso como se trata de un bloqueo indefinido se le bloqueara durante años, si se vuelve a llamar a este metodo se debloqueara el user
+            var user = await _userManager.FindByEmailAsync(email);
 
+            if (!user.LockoutEnabled)
+            {
+                var EndDate = new DateTime(2222, 06, 06);
+                var lockUserTask = _userManager.SetLockoutEnabledAsync(user, true);
+                lockUserTask.Wait();
 
+                var lockDateTask = _userManager.SetLockoutEndDateAsync(user, EndDate);
+                lockDateTask.Wait();
 
+                Response.StatusCode = (int)HttpStatusCode.OK;
+                return Json("usuario " + ((appusuario)user).IDpersona + " bloqueado indefinidamente");
+            }
+            else
+            {
 
+                var LockoutEndDateTask = _userManager.SetLockoutEndDateAsync(user, null);
+                LockoutEndDateTask.Wait();
+                var lockDisabledTask = _userManager.SetLockoutEnabledAsync(user, false);
+                lockDisabledTask.Wait();
 
+                Response.StatusCode = (int)HttpStatusCode.OK;
+                return Json("usuario= " + ((appusuario)user).IDpersona + "desbloqueado");
+            }
 
-        //void PopulateModel(ext_adm_CL_Search cliente, IDictionary values)
-        //{
-        //    if (values.Contains("IDPersona"))
-        //        cliente.TipoID = Convert.ToInt32(values["IDPersona"]);
-
-        //    if (values.Contains("Nombre"))
-        //        cliente.Nombre = Convert.ToString(values["Nombre"]);
-        //}
+        }
 
     }
 }

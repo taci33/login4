@@ -53,10 +53,7 @@
     <script src="~/js/devextreme/globalize/currency.js"></script>
     <script src="~/js/devextreme/globalize/date.js"></script>*@
 
-    @* reference dictionaries *@
-    <script src="~/js/devextreme/localization/dx.messages.de.js"></script>
-    <script src="~/js/devextreme/localization/dx.messages.es.js"></script>
-
+  
     @* Uncomment to enable client-side export 
     @*<script src="~/js/devextreme/jszip.js"></script>*@
 
@@ -97,12 +94,10 @@
 
                     if (SignInManager.IsSignedIn(User))
                     {
-                        @* items.Add()
-            .Html("<p>hola</p>")
-            .Location(ToolbarItemLocation.After);*@
+                      
 
                         items.Add()
-                            .Html("<div><a href=/GestionUsuarios/LogoutEx><i class='dx-icon-close'></i>Logout</a></div>")
+                            .Html("<div><a href=/GestionUsuarios/LogoutEx><i class='dx-icon-close'></i>Cerrar Sesión</a></div>")
 
                             .Location(ToolbarItemLocation.After);
 
@@ -116,6 +111,7 @@
                 .ID("layout-drawer")
                 .Position(DrawerPosition.Left)
                 .Opened(new JS("login4.restoreDrawerOpened()"))
+                .CloseOnOutsideClick(false)
                 .Content(@<text>
                     <div id="layout-drawer-scrollview" class="with-footer">
                         <div class="content">
@@ -126,7 +122,7 @@
                                 <div id="footer">
                                     
                                     <br />
-     
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -171,19 +167,26 @@
                                     if (User.IsInRole("Usuario")){
                                     items.Add()
                                     .Text("Facturas")
-                                    .Icon("card")
+                                    .Icon("folder")
                                     .Option("path", GetUrl("/DataGrids/Facturas"))
                                     .Selected(IsCurrentUrl("/DataGrids/Facturas"));
                                     }
-
-                                    @*if (User.IsInRole("Administrador")){  }*@
+                                                   
+                                   if (User.IsInRole("Administrador"))
+                                    { 
                                     
-                                        items.Add()
+                                        @*items.Add()
                                         .Text("Registrar")
                                         .Icon("card")
                                         .Option("path", GetAspUrl("/GestionUsuarios/RegisterEx"))
-                                        .Selected(IsCurrentUrl("/GestionUsuarios/RegisterEx"));
-                                  
+                                        .Selected(IsCurrentUrl("/GestionUsuarios/RegisterEx"));*@
+
+                                         items.Add()
+                                        .Text("RegistrarClientes")
+                                        .Icon("card")
+                                        .Option("path", GetAspUrl("/GestionUsuarios/RegistrarCliente"))
+                                        .Selected(IsCurrentUrl("/GestionUsuarios/RegistrarCliente"));
+                                   }
                                     if (!SignInManager.IsSignedIn(User))
                                     {
                                      items.Add()
@@ -192,16 +195,35 @@
                                     .Option("path", GetAspUrl("/GestionUsuarios/LoginEx"))
                                     .Selected(IsCurrentUrl("/GestionUsuarios/LoginEx"));
                                     }
-                                    if (User.IsInRole("Administrador"))
-                                    {
-                                    items.Add()
-                                    .Text("Email")
-                                    .Icon("card")
-                                    .Option("path", GetAspUrl("/GestionUsuarios/CambioEmail"))
-                                    .Selected(IsCurrentUrl("/GestionUsuarios/CambioEmail"));
-                                    }
+                                   
 
+                    if (User.IsInRole("Administrador"))
+                    {
 
+                        var AjustesItem = items.Add()
+                        .Text("Ajustes")
+                        .Icon("preferences");
+
+               
+                        {
+                            AjustesItem.Expanded(false);
+                        }
+
+                        AjustesItem.Items(AjustesSubItems =>
+                        {
+                            AjustesSubItems.Add()
+                    .Text("Email")
+                    .Icon("card")
+                    .Option("path", GetAspUrl("/SuperAdmin/CambioEmail"))
+                    .Selected(IsCurrentUrl("/SuperAdmin/CambioEmail"));
+                            AjustesSubItems.Add()
+                    .Text("Token")
+                    .Icon("card")
+                    .Option("path", GetAspUrl("/SuperAdmin/CambioToken"))
+                    .Selected(IsCurrentUrl("/SuperAdmin/CambioToken"));
+                            
+                        });
+                    }
 
                     if (User.IsInRole("Administrador") || User.IsInRole("Cliente"))
                     {
@@ -210,19 +232,18 @@
                                     .Text("Clientes")
                                     .Icon("folder");
 
-                                    // Si el elemento "Clientes" está seleccionado, mostrar subelementos
-                                    if (IsCurrentUrl("/DataGrids/ClientesPA") || IsCurrentUrl("/DataGrids/ClientesBloqueados") || IsCurrentUrl("/DataGrids/Clientesc") || IsCurrentUrl("/DataGrids/ClientesPendientes") || IsCurrentUrl("/DataGrids/ClientesRegistrados"))
+                      
                                     {
-                                        clientesItem.Expanded(true);
+                                        clientesItem.Expanded(false);
                                     }
 
                                     clientesItem.Items(clientesSubItems =>
                                     {
                                         clientesSubItems.Add()
-                                    .Text("Clientes")
+                                    .Text("Sin registrar")
                                     .Icon("folder")
-                                    .Option("path", GetAspUrl("/DataGrids/ClientesPA"))
-                                    .Selected(IsCurrentUrl("/DataGrids/ClientesPA"));
+                                    .Option("path", GetAspUrl("/DataGrids/ClientesSinRegistrar"))
+                                    .Selected(IsCurrentUrl("/DataGrids/ClientesSinRegistrar"));
 
                                         clientesSubItems.Add()
                                     .Text("Bloqueados")
@@ -231,7 +252,7 @@
                                     .Selected(IsCurrentUrl("/DataGrids/ClientesBloqueados"));
 
                                         clientesSubItems.Add()
-                                    .Text("Sin confirmar")
+                                    .Text("Pendientes")
                                     .Icon("folder")
                                     .Option("path", GetAspUrl("/DataGrids/ClientesPendientes"))
                                     .Selected(IsCurrentUrl("/DataGrids/ClientesPendientes"));
@@ -243,11 +264,7 @@
                                     .Selected(IsCurrentUrl("/DataGrids/ClientesRegistrados"));
 
 
-                                        clientesSubItems.Add()
-                                    .Text("Clientes Contactos")
-                                    .Icon("folder")
-                                    .Option("path", GetAspUrl("/DataGrids/clientesC"))
-                                    .Selected(IsCurrentUrl("/DataGrids/clientesC"));
+       
                                     });
                                 }
                             
@@ -265,9 +282,8 @@
     }
   
     <script>
-        
-       //DevExpress.localization.locale("es");
-  
+
+        DevExpress.localization.locale("es");
 
         var login4 = (function () {
 
@@ -336,15 +352,12 @@
                 getDrawer().toggle();
                 saveDrawerOpened();
             }
-            function onLogoutButtonClick() {
-                Url.Content("/Pages/GestionUsuarios/LogoutEX")
-
-            }
+            
 
             function onTreeViewItemClick(e) {
                 var drawer = getDrawer();
                 var savedOpened = restoreDrawerOpened();
-                var actualOpened = drawer.option("opened");
+                var actualOpened = drawer.option("opened");0
 
                 if (!actualOpened) {
                     drawer.show();

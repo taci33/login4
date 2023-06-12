@@ -1,0 +1,51 @@
+﻿@page
+@model login4.Pages.GestionUsuarios.RegistrarClienteModel
+@{
+}
+
+<head>
+    <link rel="stylesheet" href="~/css/login.css" />
+</head>
+
+
+<div class="cambio-mail">
+    <h2 class="reg">Registrar nuevo cliente.</h2>
+    <hr />
+    <section>
+    
+            <form id="registerForm"  method="post">
+                
+                
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-floating">
+                    <label asp-for="Input.Email"><b>Email</b> <br /></label>
+                    <input asp-for="Input.Email" class="form-control" autocomplete="email" aria-required="true" />
+                    <span asp-validation-for="Input.Email" class="text-danger"></span>
+                </div>
+               
+                <div class="form-floating">
+                    <label asp-for="Input.Nombre"><b>Nombre</b> <br /></label>
+                    <input asp-for="Input.Nombre" class="form-control" autocomplete="Nombre" aria-required="true" />
+                    <span asp-validation-for="Input.Nombre" class="text-danger"></span>
+                </div>
+               
+                <div class="form-floating">
+                    <label asp-for="Input.IDpersona"><b>IDpersona</b> <br /></label>
+                    <input asp-for="Input.IDpersona" class="form-control" autocomplete="off" aria-required="true" />
+                    <span asp-validation-for="Input.IDpersona" class=" text-danger"></span>
+                </div>
+@*
+                <div>
+
+                    <input asp-for="Input.RolAcceso" type="radio" value="Cliente" /><b>Cliente</b><br />
+                    <input asp-for="Input.RolAcceso" type="radio" value="Usuario" /><b>Usuario</b><br />
+                    <input asp-for="Input.RolAcceso" type="radio" value="Administrador" /><b>Admin</b><br />
+                </div>*@
+                <br />
+                <button id="registerSubmit" type="submit" class="w-100 btn btn-lg btn-primary">Registrar</button>
+            </form>
+     
+        
+    </section>
+
+    </div>

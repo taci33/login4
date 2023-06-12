@@ -2,23 +2,23 @@
 @using Microsoft.AspNetCore.Identity
 @inject SignInManager<IdentityUser> SignInManager
 @inject UserManager<IdentityUser> UserManager
-@model login4.Pages.DataGrids.ClientesRegistradosModel
+@model login4.Pages.DataGrids.ClientesPAModel
 @{
+   
 }
-
 <link rel="stylesheet" href="~/css/Tablas.css" />
 
 <div class="titulo_tabla">
 
-    <h2>Clientes registrados en la extranet</h2>
+    <h2>Clientes sin registrar en la extranet</h2>
 
 </div>
 
-@(Html.DevExtreme().Lookup()
-
+    @(Html.DevExtreme().Lookup()
+        
         .DataSource(ds => ds
         .Mvc()
-        .Controller("ClientesRegistrados")
+        .Controller("ClientesSinRegistrar")
         .LoadAction("GetTipo"))
         .Placeholder("Seleccionar...")
         .ApplyValueMode(EditorApplyValueMode.Instantly)
@@ -30,7 +30,8 @@
         .ValueExpr("IDTipo")
         .DisplayExpr("Nombre")
         .Value("todo")
-
+        
+        
         .OnValueChanged(@<text>
             function(data) {
             var dataGrid = $("#gridContainer").dxDataGrid("instance");
@@ -38,24 +39,24 @@
             dataGrid.clearFilter();
             else
             dataGrid.filter(["TipoID", "=", data.value]);
-            }
-        </text>
-    )
-
-    )
+            }</text>
+        
+    ))
 
 @(
 Html.DevExtreme().DataGrid<login4.Models.EF.ext_adm_CL_Search>()
     .DataSource(ds => ds.Mvc()
-        .Controller("ClientesRegistrados")
+        .Controller("ClientesSinRegistrar")
         .LoadAction("Get")
+
     )
+    
     .FilterRow(filterRow => filterRow
         .Visible(true)
         .ApplyFilter(GridApplyFilterMode.Auto)
+
          .OperationDescriptions(customizer =>
     {
-
         // Otras personalizaciones aquí
         customizer.Contains("Contiene");
         customizer.Equal("Igual a");
@@ -69,22 +70,29 @@ Html.DevExtreme().DataGrid<login4.Models.EF.ext_adm_CL_Search>()
         customizer.NotEqual("Distinto a");
         customizer.Between("Entre");
 
+
     })
+
     )
+
       .SearchPanel(searchPanel => searchPanel
         .Visible(true)
         .Width(240)
         .Placeholder("Buscar...")
-     )
-     .HeaderFilter(headerFilter =>
+     )     
+    .HeaderFilter(headerFilter =>
     {
-
+       
         headerFilter.Visible(true);
         headerFilter.Texts(texts => texts.Ok("Aceptar")
         .Cancel("Cancelar")
-        .EmptyValue("Valor vacío")
+        .EmptyValue("Valor vacío")   
+       
         );
+        
     })
+
+
     .ID("gridContainer")
 
     .Paging(paging => paging.PageSize(10))
@@ -94,24 +102,23 @@ Html.DevExtreme().DataGrid<login4.Models.EF.ext_adm_CL_Search>()
         pager.AllowedPageSizes(new[] { 5, 10, 20 });
         pager.ShowInfo(true).InfoText("Página");
 
-    })
+    }
+    )
     @*.FocusedRowEnabled(true)
     .FocusedRowIndex(0)*@
     .RepaintChangesOnly(true)
-    @*.OnEditorPreparing("onEditorPreparing")*@
+    .OnEditorPreparing("onEditorPreparing")
     .RemoteOperations(true)
     .Sorting(sorting => sorting.Mode(GridSortingMode.Multiple))
     .Grouping(g => g.AutoExpandAll(false))
     .GroupPanel(gp => gp.Visible(true).EmptyPanelText("Arrastra aquí el encabezado de una columna para agrupar por esa columna"))
-    .RowAlternationEnabled(true)
-  
+    .RowAlternationEnabled(true) 
+
     .Columns(columns =>
-    {
-        if (User.IsInRole("Administrador"))
-        {
-            columns.AddFor(m => m.IDPersona)
-            .AllowEditing(false);
-        }
+    { 
+
+        columns.AddFor(m => m.IDPersona)
+        .AllowEditing(false);
 
         columns.AddFor(m => m.Nombre).AllowEditing(false);
 
@@ -123,18 +130,32 @@ Html.DevExtreme().DataGrid<login4.Models.EF.ext_adm_CL_Search>()
 
         columns.AddFor(m => m.CIF_NIF).AllowEditing(false);
 
-        columns.AddFor(m => m.EXT_Email).AllowEditing(false).Caption("Email");
+        columns.AddFor(m => m.Email)
 
+                .AllowFiltering(false)
+                .AllowSorting(false)
+
+                .Lookup(l => l
+                    .DataSource("getEmail")
+                    .DisplayExpr("Email")
+                    
+                    )
+                    
+                    .ShowEditorAlways(true)
+                    .CalculateDisplayValue("Email");
+   
         columns.AddFor(m => m.PaginaWeb).AllowEditing(false);
 
-        columns.AddFor(m => m.UsuarioRegistrado).Visible(false).AllowEditing(false);
+        columns.AddFor(m => m.UsuarioRegistrado)
+        .Visible(false)
+        .AllowEditing(false);
 
         columns.AddFor(m => m.TipoDeCliente).AllowEditing(false);
 
         columns.AddFor(m => m.TipoID).AllowEditing(false).Visible(false);
 
-        columns.AddFor(m => m.LockoutEnabled).Visible(false);
-
+        columns.AddFor(m => m.LockoutEnabled)
+        .Visible(false);
         columns.Add()
       .Type(GridCommandColumnType.Buttons)
       .Width(110)
@@ -143,58 +164,77 @@ Html.DevExtreme().DataGrid<login4.Models.EF.ext_adm_CL_Search>()
           btns.Add().Name(GridColumnButtonName.Edit);
           btns.Add().Name(GridColumnButtonName.Delete);
           btns.Add()
-          .Name("Bloquear")
-          .Hint("Bloquear")
-          .Icon("lock")
-          .OnClick("BloquearOnClick");
+          .Name("Registrar")
+          .Hint("Registrar")
+          .Icon("add")
+          .OnClick("onClick");
+          
       });
     })
       .Editing(editing =>
       {
           editing.Mode(GridEditMode.Cell);
           editing.AllowUpdating(true);
-          @*editing.AllowAdding(true);*@
+      
       })
 )
 
 <script>
+   
+    
 
-  
+    function onEditorPreparing(e) {
+        if (e.parentType === "dataRow" && e.dataField === "Email") {
+            e.editorOptions.onValueChanged = function (args) {
+                var grid = $("#gridContainer").dxDataGrid("instance");
+                var rowIndex = e.row.rowIndex;
+                grid.cellValue(rowIndex, "Email", args.value.Email);
+            };
+        }
+    }
+   
+
+
 
     function getEmail(options) {
         var IDPersona = options.data.IDPersona;
         return {
             store: DevExpress.data.AspNet.createStore({
                 key: "IDContacto",
-                loadUrl: '@Url.Action("GetEmail", "ClientesRegistrados", new { httproute = true, IDPersona = "__IDPersona__"})'
+                loadUrl: '@Url.Action("GetEmail", "ClientesSinRegistrar", new { httproute = true, IDPersona = "__IDPersona__"})'
                     .replace("__IDPersona__", IDPersona),
                 loadParams: { IDPersona: IDPersona }
-
+                     
             }),
+            
+        }; 
+        }
+    
+     
 
-        };
-    }
-    function BloquearOnClick(e) {
-
+    function onClick(e) {
+    
         var grid = e.component;
-        var email = grid.cellValue(e.row.rowIndex, "EXT_Email");
-
+        var email = grid.cellValue(e.row.rowIndex, "Email");
+        var nombre = grid.cellValue(e.row.rowIndex, "Nombre");
+        var idpersona = grid.cellValue(e.row.rowIndex, "IDPersona");
         $.ajax({
             type: "POST",
-            url: "@Url.Action("Bloquear", "ClientesBloqueados")",
+            url: "@Url.Action("Registrar", "ClientesSinRegistrar")",
             data: {
-                email: email
+                email: email,
+                nombre: nombre,
+                idpersona: idpersona
             },
             success: function (msg) {
-                window.alert(msg);
+                window.alert(msg + " " + email);
+
                 location.reload();
             },
             error: function (req, status, error) {
-                window.alert(email + " error= " + error);
+                window.alert(email + " error = " + error);
             }
         });
-
     }
-
-
+   
 </script>

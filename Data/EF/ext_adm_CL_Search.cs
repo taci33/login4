@@ -20,9 +20,7 @@ namespace login4.Models.EF
         public string TipoDeCliente { get; set; }
         public int TipoID { get; set; }
         public bool LockoutEnabled { get; set; }
-
         public bool EmailConfirmed { get; set; }
-
-        //public string EXT_Email { get; set; }
+        public string EXT_Email { get; set; }
     }
 }

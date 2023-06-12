@@ -5,22 +5,32 @@
 @model login4.Pages.DataGrids.ClientesBloqueadosModel
 @{
 }
+
+<link rel="stylesheet" href="~/css/Tablas.css" />
+
+<div class="titulo_tabla">
+
+    <h2>Clientes bloqueados en la extranet</h2>
+
+</div>
+
 @(Html.DevExtreme().Lookup()
 
         .DataSource(ds => ds
         .Mvc()
         .Controller("ClientesBloqueados")
         .LoadAction("GetTipo"))
+        .Placeholder("Seleccionar...")
         .ApplyValueMode(EditorApplyValueMode.Instantly)
         .ShowCancelButton(true)
         .ShowClearButton(true)
         .CancelButtonText("cancelar")
         .ClearButtonText("quitar filtro")
-     
+        
         .ValueExpr("IDTipo")
         .DisplayExpr("Nombre")
         .Value("todo")
-
+        
         .OnValueChanged(@<text>
             function(data) {
             var dataGrid = $("#gridContainer").dxDataGrid("instance");
@@ -38,32 +48,64 @@
         .Controller("ClientesBloqueados")
         .LoadAction("Get")
      )
+     
     .FilterRow(filterRow => filterRow
-        .Visible(true)
-        .ApplyFilter(GridApplyFilterMode.Auto)
-    )
+    .Visible(true)
+    .ApplyFilter(GridApplyFilterMode.Auto)
+    
+    .OperationDescriptions(customizer =>
+    {       
+        // aqui se ajustan los nombres de el tipo de filtro para los buscadores de las columnas
+        customizer.Contains("Contiene");
+        customizer.Equal("Igual a");
+        customizer.EndsWith("Acaba con");
+        customizer.GreaterThan("Mayor que");
+        customizer.LessThan("Menor que");
+        customizer.GreaterThanOrEqual("Mayor o igual que");
+        customizer.LessThanOrEqual("Menor o igual que");
+        customizer.NotContains("No contiene");
+        customizer.StartsWith("Empieza con");
+        customizer.NotEqual("Distinto a");
+        customizer.Between("Entre");
+       
+    })
+    
+)
+
+    
       .SearchPanel(searchPanel => searchPanel
         .Visible(true)
         .Width(240)
         .Placeholder("Buscar...")
      )
-    .HeaderFilter(headerFilter => headerFilter.Visible(true))
+
+     .HeaderFilter(headerFilter =>
+    {
+
+        headerFilter.Visible(true);
+        headerFilter.Texts(texts => texts.Ok("Aceptar")
+        .Cancel("Cancelar")
+        .EmptyValue("Valor vacío")
+        );
+    })
     .ID("gridContainer")
+    
     .Paging(paging => paging.PageSize(10))
     .Pager(pager =>
     {
+
         pager.ShowPageSizeSelector(true);
         pager.AllowedPageSizes(new[] { 5, 10, 20 });
-        pager.ShowInfo(true);
+        pager.ShowInfo(true).InfoText("Página");
     })
+   @* .FocusedRowEnabled(true)
+    .FocusedRowIndex(0)*@
     .RepaintChangesOnly(true)
-    .OnEditorPreparing("onEditorPreparing")
     .RemoteOperations(true)
     .Sorting(sorting => sorting.Mode(GridSortingMode.Multiple))
     .Grouping(g => g.AutoExpandAll(false))
-    .GroupPanel(gp => gp.Visible(true))
+    .GroupPanel(gp => gp.Visible(true).EmptyPanelText("Arrastra aquí el encabezado de una columna para agrupar por esa columna"))
     .RowAlternationEnabled(true)
-    .FilterRow(f => f.Visible(true))
     .Columns(columns =>
     {
 
@@ -82,18 +124,7 @@
 
         columns.AddFor(m => m.CIF_NIF).AllowEditing(false);
 
-
-        columns.AddFor(m => m.Email)
-
-                .AllowFiltering(false)
-
-                .Lookup(l => l
-                    .DataSource("getEmail")
-                    .DisplayExpr("Email")
-                    )
-
-                    .ShowEditorAlways(true)
-                    .CalculateDisplayValue("Email");
+        columns.AddFor(m => m.EXT_Email).AllowEditing(false).Caption("Email");
      
         columns.AddFor(m => m.PaginaWeb).AllowEditing(false);
 
@@ -102,7 +133,7 @@
 
         columns.AddFor(m => m.TipoDeCliente).AllowEditing(false);
 
-        columns.AddFor(m => m.TipoID).AllowEditing(false);
+        columns.AddFor(m => m.TipoID).AllowEditing(false).Visible(false);
 
         columns.AddFor(m => m.LockoutEnabled)
         .Visible(false);
@@ -126,6 +157,8 @@
          .OnClick("BloquearOnClick");
       });
     })
+     
+
       .Editing(editing =>
       {
           editing.Mode(GridEditMode.Cell);
@@ -133,39 +166,14 @@
          
       })
 )
-
-<script>
-    function onEditorPreparing(e) {
-        if (e.parentType === "dataRow" && e.dataField === "Email") {
-            e.editorOptions.onValueChanged = function (args) {
-                var grid = $("#gridContainer").dxDataGrid("instance");
-                var rowIndex = e.row.rowIndex;
-                grid.cellValue(rowIndex, "Email", args.value.Email);
-            };
-        }
-    }
-
-    function getEmail(options) {
-        var IDPersona = options.data.IDPersona;
-        return {
-            store: DevExpress.data.AspNet.createStore({
-                key: "IDContacto",
-                loadUrl: '@Url.Action("GetEmail", "ClientesBloqueados", new { httproute = true, IDPersona = "__IDPersona__"})'
-                    .replace("__IDPersona__", IDPersona),
-                loadParams: { IDPersona: IDPersona }
-
-            }),
-
-        };
-    }
-
-    
+<script>       
 
     function onClick(e) {
+        var grid = e.component;
+        var email = grid.cellValue(e.row.rowIndex, "EXT_Email");
+        var nombre = grid.cellValue(e.row.rowIndex, "Nombre");
+        var idpersona = grid.cellValue(e.row.rowIndex, "IDPersona");
         
-        var email = e.row.cells[6].text
-        var nombre = e.row.cells[1].text
-        var idpersona = e.row.cells[0].text
         $.ajax({
             type: "POST",
             url: "@Url.Action("Desregistrar", "ClientesBloqueados")",
@@ -174,24 +182,28 @@
             },
             success: function (msg) {
                 window.alert(msg + " " + email);
+                location.reload();
             },
             error: function (req, status, error) {
                 window.alert(email + " error= " + error);
             }
         });
     }
+    //Esta función no solo bloquea, si el usuario esta bloqueado lo desbloqueará
     function BloquearOnClick(e) {
 
-        var email = e.row.cells[6].text
+        var grid = e.component;
+        var email = grid.cellValue(e.row.rowIndex, "EXT_Email");
 
         $.ajax({
             type: "POST",
-            url: "@Url.Action("Bloquear", "ClientesContactos")",
+            url: "@Url.Action("Bloquear", "ClientesBloqueados")",
             data: {
                 email: email
             },
             success: function (msg) {
                 window.alert(msg);
+                location.reload();
             },
             error: function (req, status, error) {
                 window.alert(email + " error= " + error);

@@ -10,7 +10,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading;
 using System.Threading.Tasks;
-using login4.Pages;
+using login4.Pages.GestionUsuarios;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -182,8 +182,7 @@ namespace login4.Areas.Identity.Pages.Account
                         values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
                         protocol: Request.Scheme);
 
-                    //await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                    //    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                  
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {
@@ -204,20 +203,7 @@ namespace login4.Areas.Identity.Pages.Account
             // If we got this far, something failed, redisplay form
             return Page();
         }
-        //private IdentityUser CreateUser()
-        //{
-        //    try
-        //    {
-        //        return Activator.CreateInstance<IdentityUser>();
-        //    }
-        //    catch
-        //    {
-        //        throw new InvalidOperationException($"Can't create an instance of '{nameof(IdentityUser)}'. " +
-        //            $"Ensure that '{nameof(IdentityUser)}' is not an abstract class and has a parameterless constructor, or alternatively " +
-        //            $"override the register page in /Areas/Identity/Pages/Account/Register.cshtml");
-        //    }
-        //}
-
+      
         private IUserEmailStore<IdentityUser> GetEmailStore()
         {
             if (!_userManager.SupportsUserEmail)
